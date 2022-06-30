@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"github.com/e421083458/golang_common/lib"
 	"github.com/gin-gonic/gin"
+	"github.com/jmdrws/go_gateway/dao"
 	"github.com/jmdrws/go_gateway/dto"
 	"github.com/jmdrws/go_gateway/middleware"
 )
@@ -26,9 +28,23 @@ func AdminLoginRegister(group *gin.RouterGroup) {
 func (adminLogin *AdminLoginController) AdminLogin(c *gin.Context) {
 	params := &dto.AdminLoginInput{}
 	if err := params.BindValidParam(c); err != nil {
-		middleware.ResponseError(c, 1001, err)
+		middleware.ResponseError(c, 2000, err)
 		return
 	}
-	out := &dto.AdminLoginOutput{Token: params.UserName}
+	//1. params.UserName 取得管理员信息 adminInfo
+	//2. params.password+adminInfo.salt sha256 saltPassword
+	//3. saltPassword==> adminInfo.password 执行数据保存
+	admin := &dao.Admin{}
+	tx, err := lib.GetGormPool("default")
+	if err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+	admin, err = admin.LoginCheck(c, tx, params)
+	if err != nil {
+		middleware.ResponseError(c, 2002, err)
+		return
+	}
+	out := &dto.AdminLoginOutput{Token: admin.UserName}
 	middleware.ResponseSuccess(c, out)
 }
