@@ -32,18 +32,15 @@ func (t *Admin) LoginCheck(c *gin.Context, tx *gorm.DB, param *dto.AdminLoginInp
 		return nil, errors.New("用户信息不存在")
 	}
 
-	saltPassword := public.GenSaltPassword(adminInfo.Salt, param.UserName)
+	saltPassword := public.GenSaltPassword(adminInfo.Salt, param.Password)
 	if adminInfo.Password != saltPassword {
 		return nil, errors.New("密码错误，请重新输入")
-
 	}
-
 	return adminInfo, nil
 }
 
 func (t *Admin) Find(c *gin.Context, tx *gorm.DB, search *Admin) (*Admin, error) {
 	out := &Admin{}
-	//这个SQL有问题
 	err := tx.WithContext(c).Where("user_name = ?", search.UserName).Find(out).Error
 	if err != nil {
 		return nil, err
