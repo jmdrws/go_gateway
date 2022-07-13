@@ -30,3 +30,11 @@ type ServiceListItemOutput struct {
 func (param *ServiceListInput) BindValidParam(c *gin.Context) error {
 	return public.DefaultGetValidParams(c, param)
 }
+
+type ServiceDeleteInput struct {
+	ID int64 `json:"id" form:"id" comment:"服务ID" example:"56" validate:"required"` //服务ID
+}
+
+func (param *ServiceDeleteInput) BindValidParam(c *gin.Context) error {
+	return public.DefaultGetValidParams(c, param)
+}
