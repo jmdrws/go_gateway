@@ -17,7 +17,7 @@ func (t *TcpRule) TableName() string {
 
 func (t *TcpRule) Find(c *gin.Context, tx *gorm.DB, search *TcpRule) (*TcpRule, error) {
 	model := &TcpRule{}
-	err := tx.WithContext(c).Where(search).Find(model).Error
+	err := tx.WithContext(c).Where("service_id = ?", search.ServiceID).Find(model).Error
 	return model, err
 }
 

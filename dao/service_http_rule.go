@@ -23,7 +23,7 @@ func (t *HttpRule) TableName() string {
 
 func (t *HttpRule) Find(c *gin.Context, tx *gorm.DB, search *HttpRule) (*HttpRule, error) {
 	model := &HttpRule{}
-	err := tx.WithContext(c).Where(search).Find(model).Error
+	err := tx.WithContext(c).Where("service_id = ?", search.ServiceID).Find(model).Error
 	return model, err
 }
 

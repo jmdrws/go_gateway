@@ -22,7 +22,7 @@ func (t *AccessControl) TableName() string {
 
 func (t *AccessControl) Find(c *gin.Context, tx *gorm.DB, search *AccessControl) (*AccessControl, error) {
 	model := &AccessControl{}
-	err := tx.WithContext(c).Where(search).Find(model).Error
+	err := tx.WithContext(c).Where("service_id = ?", search.ServiceID).Find(model).Error
 	return model, err
 }
 

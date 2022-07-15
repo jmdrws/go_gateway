@@ -85,7 +85,7 @@ func (t *ServiceInfo) ServiceDetail(c *gin.Context, tx *gorm.DB, search *Service
 
 func (t *ServiceInfo) Find(c *gin.Context, tx *gorm.DB, search *ServiceInfo) (*ServiceInfo, error) {
 	out := &ServiceInfo{}
-	err := tx.WithContext(c).Where(search).Find(out).Error
+	err := tx.WithContext(c).Where("ServiceName = ?", search.ServiceName).Find(out).Error
 	if err != nil {
 		return nil, err
 	}
