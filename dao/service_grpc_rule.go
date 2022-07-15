@@ -18,7 +18,7 @@ func (t *GrpcRule) TableName() string {
 
 func (t *GrpcRule) Find(c *gin.Context, tx *gorm.DB, search *GrpcRule) (*GrpcRule, error) {
 	model := &GrpcRule{}
-	err := tx.WithContext(c).Where("service_id = ?", search.ServiceID).Find(model).Error
+	err := tx.WithContext(c).Where("service_id = ?", search.ServiceID).First(model).Error
 	return model, err
 }
 

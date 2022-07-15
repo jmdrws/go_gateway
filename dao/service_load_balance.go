@@ -29,7 +29,7 @@ func (t *LoadBalance) TableName() string {
 
 func (t *LoadBalance) Find(c *gin.Context, tx *gorm.DB, search *LoadBalance) (*LoadBalance, error) {
 	model := &LoadBalance{}
-	err := tx.WithContext(c).Where("service_id = ?", search.ServiceID).Find(model).Error
+	err := tx.WithContext(c).Where("service_id = ?", search.ServiceID).First(model).Error
 	return model, err
 }
 

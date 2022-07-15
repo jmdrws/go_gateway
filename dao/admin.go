@@ -41,7 +41,7 @@ func (t *Admin) LoginCheck(c *gin.Context, tx *gorm.DB, param *dto.AdminLoginInp
 
 func (t *Admin) Find(c *gin.Context, tx *gorm.DB, search *Admin) (*Admin, error) {
 	out := &Admin{}
-	err := tx.WithContext(c).Where("user_name = ?", search.UserName).Find(out).Error
+	err := tx.WithContext(c).Where("user_name = ?", search.UserName).First(out).Error
 	if err != nil {
 		return nil, err
 	}
