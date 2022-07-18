@@ -12,7 +12,7 @@ require (
 	github.com/go-openapi/swag v0.21.1 // indirect
 	github.com/go-playground/locales v0.13.0
 	github.com/go-playground/universal-translator v0.17.0
-	github.com/gorilla/sessions v1.1.3 // indirect
+	github.com/gorilla/sessions v1.2.1 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/swaggo/files v0.0.0-20190704085106-630677cd5c14
@@ -24,6 +24,6 @@ require (
 	gopkg.in/go-playground/validator.v9 v9.29.0
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/gorm v1.22.4
-)
+	)
 
 replace github.com/gin-contrib/sse v0.1.0 => github.com/e421083458/sse v0.1.1
