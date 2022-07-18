@@ -52,26 +52,31 @@ func (t *ServiceInfo) ServiceDetail(c *gin.Context, tx *gorm.DB, search *Service
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
+
 	tcpRule := &TcpRule{ServiceID: search.ID}
 	tcpRule, err = tcpRule.Find(c, tx, tcpRule)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
+
 	accessControl := &AccessControl{ServiceID: search.ID}
 	accessControl, err = accessControl.Find(c, tx, accessControl)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
+
 	grpcRule := &GrpcRule{ServiceID: search.ID}
 	grpcRule, err = grpcRule.Find(c, tx, grpcRule)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
+
 	loadBalance := &LoadBalance{ServiceID: search.ID}
 	loadBalance, err = loadBalance.Find(c, tx, loadBalance)
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
+
 	detail := &ServiceDetail{
 		Info:          search,
 		HTTPRule:      httpRule,
@@ -85,7 +90,7 @@ func (t *ServiceInfo) ServiceDetail(c *gin.Context, tx *gorm.DB, search *Service
 
 func (t *ServiceInfo) Find(c *gin.Context, tx *gorm.DB, search *ServiceInfo) (*ServiceInfo, error) {
 	out := &ServiceInfo{}
-	err := tx.WithContext(c).Where("service_name = ?", search.ServiceName).First(out).Error
+	err := tx.WithContext(c).Where("id = ?", search.ID).Or("service_name = ?", search.ServiceName).First(out).Error
 	if err != nil {
 		return nil, err
 	}
