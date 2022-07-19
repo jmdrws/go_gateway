@@ -21,8 +21,11 @@ func ServiceRegister(group *gin.RouterGroup) {
 	group.GET("/service_delete", service.ServiceDelete)
 	group.GET("/service_detail", service.ServiceDetail)
 	group.GET("/service_stat", service.ServiceStat)
-	group.POST("/service_add_http", service.ServiceAddHttp)
+	group.POST("/service_add_http", service.ServiceAddHTTP)
 	group.POST("/service_update_http", service.ServiceUpdateHTTP)
+
+	group.POST("/service_add_tcp", service.ServiceAddTCP)
+	group.POST("/service_update_tcp", service.ServiceUpdateTCP)
 }
 
 // ServiceList godoc
@@ -161,7 +164,7 @@ func (service *ServiceController) ServiceDelete(c *gin.Context) {
 // @Param body body dto.ServiceAddHTTPInput true "body"
 // @Success 200 {object} middleware.Response{data=string} "success"
 // @Router /service/service_add_http [post]
-func (service *ServiceController) ServiceAddHttp(c *gin.Context) {
+func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 	params := &dto.ServiceAddHTTPInput{}
 	if err := params.BindValidParam(c); err != nil {
 		middleware.ResponseError(c, 2000, err)
@@ -180,7 +183,7 @@ func (service *ServiceController) ServiceAddHttp(c *gin.Context) {
 	serviceInfo := &dao.ServiceInfo{ServiceName: params.ServiceName}
 	if _, err = serviceInfo.Find(c, tx, serviceInfo); err == nil {
 		tx.Rollback()
-		middleware.ResponseError(c, 2002, errors.New("服务已存在"))
+		middleware.ResponseError(c, 2002, errors.New("服务名被占用，请重新输入"))
 		return
 	}
 
@@ -192,6 +195,7 @@ func (service *ServiceController) ServiceAddHttp(c *gin.Context) {
 	}
 
 	serviceModel := &dao.ServiceInfo{
+		LoadType:    public.LoadTypeHTTP,
 		ServiceName: params.ServiceName,
 		ServiceDesc: params.ServiceDesc,
 	}
@@ -222,7 +226,6 @@ func (service *ServiceController) ServiceAddHttp(c *gin.Context) {
 		OpenAuth:          params.OpenAuth,
 		BlackList:         params.BlackList,
 		WhiteList:         params.WhiteList,
-		WhiteHostName:     params.WhiteList,
 		ClientIPFlowLimit: params.ClientipFlowLimit,
 		ServiceFlowLimit:  params.ServiceFlowLimit,
 	}
@@ -289,11 +292,10 @@ func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 	serviceDetail, err := serviceInfo.ServiceDetail(c, tx, serviceInfo)
 	if err != nil {
 		tx.Rollback()
-		middleware.ResponseError(c, 2004, errors.New("服务不存在"))
+		middleware.ResponseError(c, 2004, errors.New("服务详情不存在"))
 		return
 	}
 	info := serviceDetail.Info
-	info.ServiceName = params.ServiceName
 	info.ServiceDesc = params.ServiceDesc
 	if err := info.Save(c, tx); err != nil {
 		tx.Rollback()
@@ -317,7 +319,7 @@ func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 	accessControl.OpenAuth = params.OpenAuth
 	accessControl.BlackList = params.BlackList
 	accessControl.WhiteList = params.WhiteList
-	accessControl.ClientIPFlowLimit = params.ClientipFlowLimit
+	accessControl.ClientIPFlowLimit = params.ClientIPFlowLimit
 	accessControl.ServiceFlowLimit = params.ServiceFlowLimit
 	if err := accessControl.Save(c, tx); err != nil {
 		tx.Rollback()
@@ -336,6 +338,183 @@ func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 	if err := loadbalance.Save(c, tx); err != nil {
 		tx.Rollback()
 		middleware.ResponseError(c, 2008, err)
+		return
+	}
+	tx.Commit()
+	middleware.ResponseSuccess(c, "")
+}
+
+// ServiceAddTCP godoc
+// @Summary 添加TCP服务
+// @Description 添加TCP服务
+// @Tags 服务管理
+// @ID /service/service_add_tcp
+// @Accept  json
+// @Produce  json
+// @Param body body dto.ServiceAddTCPInput true "body"
+// @Success 200 {object} middleware.Response{data=string} "success"
+// @Router /service/service_add_tcp [post]
+func (service *ServiceController) ServiceAddTCP(c *gin.Context) {
+	params := &dto.ServiceAddTCPInput{}
+	if err := params.BindValidParam(c); err != nil {
+		middleware.ResponseError(c, 2000, err)
+		return
+	}
+	tx, err := lib.GetGormPool("default")
+	if err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+	if len(strings.Split(params.IpList, ",")) != len(strings.Split(params.WeightList, ",")) {
+		middleware.ResponseError(c, 2004, errors.New("IP列表与权重列表数量不一致"))
+		return
+	}
+	tx = tx.Begin()
+	serviceInfo := &dao.ServiceInfo{ServiceName: params.ServiceName}
+	if _, err = serviceInfo.Find(c, tx, serviceInfo); err == nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2002, errors.New("服务名被占用，请重新输入"))
+		return
+	}
+
+	tcpPost := &dao.TcpRule{Port: params.Port}
+	if _, err = tcpPost.Find(c, tx, tcpPost); err == nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2003, errors.New("服务端口被占用"))
+		return
+	}
+
+	grpcPost := &dao.GrpcRule{
+		Port: params.Port,
+	}
+	if _, err = grpcPost.Find(c, tx, grpcPost); err == nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2005, errors.New("服务端口被占用"))
+		return
+	}
+	serviceModel := &dao.ServiceInfo{
+		LoadType:    public.LoadTypeTCP,
+		ServiceName: params.ServiceName,
+		ServiceDesc: params.ServiceDesc,
+	}
+	if err := serviceModel.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2006, err)
+		return
+	}
+
+	tcpRule := &dao.TcpRule{
+		ServiceID: serviceModel.ID,
+		Port:      params.Port,
+	}
+
+	if err := tcpRule.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2007, err)
+		return
+	}
+	accessControl := &dao.AccessControl{
+		ServiceID:         serviceModel.ID,
+		OpenAuth:          params.OpenAuth,
+		BlackList:         params.BlackList,
+		WhiteList:         params.WhiteList,
+		WhiteHostName:     params.WhiteHostName,
+		ClientIPFlowLimit: params.ClientIPFlowLimit,
+		ServiceFlowLimit:  params.ServiceFlowLimit,
+	}
+
+	if err := accessControl.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2008, err)
+		return
+	}
+
+	loadBalance := &dao.LoadBalance{
+		ServiceID:  serviceModel.ID,
+		RoundType:  params.RoundType,
+		IpList:     params.IpList,
+		WeightList: params.WeightList,
+		ForbidList: params.ForbidList,
+	}
+	if err := loadBalance.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2009, err)
+		return
+	}
+	tx.Commit()
+	middleware.ResponseSuccess(c, "")
+}
+
+// ServiceUpdateTCP godoc
+// @Summary 修改TCP服务
+// @Description 修改TCP服务
+// @Tags 服务管理
+// @ID /service/service_update_tcp
+// @Accept  json
+// @Produce  json
+// @Param body body dto.ServiceUpdateTCPInput true "body"
+// @Success 200 {object} middleware.Response{data=string} "success"
+// @Router /service/service_update_tcp [post]
+func (service *ServiceController) ServiceUpdateTCP(c *gin.Context) {
+	params := &dto.ServiceUpdateTCPInput{}
+	if err := params.BindValidParam(c); err != nil {
+		middleware.ResponseError(c, 2000, err)
+		return
+	}
+
+	if len(strings.Split(params.IpList, ",")) != len(strings.Split(params.WhiteList, ",")) {
+		middleware.ResponseError(c, 2001, errors.New("IP列表与权重列表数量不一致"))
+		return
+	}
+	tx, err := lib.GetGormPool("default")
+	if err != nil {
+		middleware.ResponseError(c, 2002, err)
+		return
+	}
+	tx = tx.Begin()
+
+	serviceInfo := &dao.ServiceInfo{ID: params.ID}
+	serviceInfo, err = serviceInfo.Find(c, tx, serviceInfo)
+	if err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2003, errors.New("服务不存在"))
+		return
+	}
+
+	serviceDetail, err := serviceInfo.ServiceDetail(c, tx, serviceInfo)
+	if err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2004, errors.New("服务详情不存在"))
+		return
+	}
+
+	info := serviceDetail.Info
+	info.ServiceDesc = params.ServiceDesc
+	if err := info.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2005, err)
+		return
+	}
+
+	accessControl := serviceDetail.AccessControl
+	accessControl.OpenAuth = params.OpenAuth
+	accessControl.BlackList = params.BlackList
+	accessControl.WhiteList = params.WhiteList
+	accessControl.ClientIPFlowLimit = params.ClientIPFlowLimit
+	accessControl.ServiceFlowLimit = params.ServiceFlowLimit
+	if err := accessControl.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2006, err)
+		return
+	}
+
+	loadbalance := serviceDetail.LoadBalance
+	loadbalance.RoundType = params.RoundType
+	loadbalance.IpList = params.IpList
+	loadbalance.WeightList = params.WeightList
+	if err := loadbalance.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2007, err)
 		return
 	}
 	tx.Commit()

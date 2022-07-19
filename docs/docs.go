@@ -229,6 +229,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/service/service_add_tcp": {
+            "post": {
+                "description": "添加TCP服务",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "服务管理"
+                ],
+                "summary": "添加TCP服务",
+                "operationId": "/service/service_add_tcp",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ServiceAddTCPInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/middleware.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/service/service_delete": {
             "get": {
                 "description": "服务删除",
@@ -377,6 +424,51 @@ const docTemplate = `{
                 }
             }
         },
+        "/service/service_stat": {
+            "get": {
+                "description": "服务流量统计",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "服务管理"
+                ],
+                "summary": "服务流量统计",
+                "operationId": "/service/service_stat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "服务ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/middleware.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.ServiceStatOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/service/service_update_http": {
             "post": {
                 "description": "修改HTTP服务",
@@ -399,6 +491,53 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/dto.ServiceUpdateHTTPInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/middleware.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/service/service_update_tcp": {
+            "post": {
+                "description": "修改TCP服务",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "服务管理"
+                ],
+                "summary": "修改TCP服务",
+                "operationId": "/service/service_update_tcp",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.ServiceUpdateTCPInput"
                         }
                     }
                 ],
@@ -816,6 +955,81 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.ServiceAddTCPInput": {
+            "type": "object",
+            "required": [
+                "ip_list",
+                "port",
+                "service_desc",
+                "service_name",
+                "weight_list"
+            ],
+            "properties": {
+                "black_list": {
+                    "type": "string"
+                },
+                "clientip_flow_limit": {
+                    "type": "integer"
+                },
+                "forbid_list": {
+                    "type": "string"
+                },
+                "header_transfor": {
+                    "type": "string"
+                },
+                "ip_list": {
+                    "type": "string"
+                },
+                "open_auth": {
+                    "type": "integer"
+                },
+                "port": {
+                    "type": "integer",
+                    "maximum": 8999,
+                    "minimum": 8001
+                },
+                "round_type": {
+                    "type": "integer"
+                },
+                "service_desc": {
+                    "type": "string"
+                },
+                "service_flow_limit": {
+                    "type": "integer"
+                },
+                "service_name": {
+                    "type": "string"
+                },
+                "weight_list": {
+                    "type": "string"
+                },
+                "white_host_name": {
+                    "type": "string"
+                },
+                "white_list": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.ServiceStatOutput": {
+            "type": "object",
+            "properties": {
+                "today": {
+                    "description": "列表",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "yesterday": {
+                    "description": "列表",
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
         "dto.ServiceUpdateHTTPInput": {
             "type": "object",
             "required": [
@@ -945,6 +1159,63 @@ const docTemplate = `{
                     "description": "白名单ip",
                     "type": "string",
                     "example": ""
+                }
+            }
+        },
+        "dto.ServiceUpdateTCPInput": {
+            "type": "object",
+            "required": [
+                "id",
+                "ip_list",
+                "port",
+                "service_desc",
+                "service_name",
+                "weight_list"
+            ],
+            "properties": {
+                "black_list": {
+                    "type": "string"
+                },
+                "clientip_flow_limit": {
+                    "type": "integer"
+                },
+                "forbid_list": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "ip_list": {
+                    "type": "string"
+                },
+                "open_auth": {
+                    "type": "integer"
+                },
+                "port": {
+                    "type": "integer",
+                    "maximum": 8999,
+                    "minimum": 8001
+                },
+                "round_type": {
+                    "type": "integer"
+                },
+                "service_desc": {
+                    "type": "string"
+                },
+                "service_flow_limit": {
+                    "type": "integer"
+                },
+                "service_name": {
+                    "type": "string"
+                },
+                "weight_list": {
+                    "type": "string"
+                },
+                "white_host_name": {
+                    "type": "string"
+                },
+                "white_list": {
+                    "type": "string"
                 }
             }
         },

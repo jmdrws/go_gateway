@@ -280,6 +280,58 @@ definitions:
     - service_name
     - weight_list
     type: object
+  dto.ServiceAddTCPInput:
+    properties:
+      black_list:
+        type: string
+      clientip_flow_limit:
+        type: integer
+      forbid_list:
+        type: string
+      header_transfor:
+        type: string
+      ip_list:
+        type: string
+      open_auth:
+        type: integer
+      port:
+        maximum: 8999
+        minimum: 8001
+        type: integer
+      round_type:
+        type: integer
+      service_desc:
+        type: string
+      service_flow_limit:
+        type: integer
+      service_name:
+        type: string
+      weight_list:
+        type: string
+      white_host_name:
+        type: string
+      white_list:
+        type: string
+    required:
+    - ip_list
+    - port
+    - service_desc
+    - service_name
+    - weight_list
+    type: object
+  dto.ServiceStatOutput:
+    properties:
+      today:
+        description: 列表
+        items:
+          type: integer
+        type: array
+      yesterday:
+        description: 列表
+        items:
+          type: integer
+        type: array
+    type: object
   dto.ServiceUpdateHTTPInput:
     properties:
       black_list:
@@ -383,6 +435,46 @@ definitions:
     - id
     - ip_list
     - rule
+    - service_desc
+    - service_name
+    - weight_list
+    type: object
+  dto.ServiceUpdateTCPInput:
+    properties:
+      black_list:
+        type: string
+      clientip_flow_limit:
+        type: integer
+      forbid_list:
+        type: string
+      id:
+        type: integer
+      ip_list:
+        type: string
+      open_auth:
+        type: integer
+      port:
+        maximum: 8999
+        minimum: 8001
+        type: integer
+      round_type:
+        type: integer
+      service_desc:
+        type: string
+      service_flow_limit:
+        type: integer
+      service_name:
+        type: string
+      weight_list:
+        type: string
+      white_host_name:
+        type: string
+      white_list:
+        type: string
+    required:
+    - id
+    - ip_list
+    - port
     - service_desc
     - service_name
     - weight_list
@@ -526,6 +618,34 @@ paths:
       summary: 添加HTTP服务
       tags:
       - 服务管理
+  /service/service_add_tcp:
+    post:
+      consumes:
+      - application/json
+      description: 添加TCP服务
+      operationId: /service/service_add_tcp
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ServiceAddTCPInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: 添加TCP服务
+      tags:
+      - 服务管理
   /service/service_delete:
     get:
       consumes:
@@ -616,6 +736,33 @@ paths:
       summary: 服务列表
       tags:
       - 服务管理
+  /service/service_stat:
+    get:
+      consumes:
+      - application/json
+      description: 服务流量统计
+      operationId: /service/service_stat
+      parameters:
+      - description: 服务ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ServiceStatOutput'
+              type: object
+      summary: 服务流量统计
+      tags:
+      - 服务管理
   /service/service_update_http:
     post:
       consumes:
@@ -642,6 +789,34 @@ paths:
                   type: string
               type: object
       summary: 修改HTTP服务
+      tags:
+      - 服务管理
+  /service/service_update_tcp:
+    post:
+      consumes:
+      - application/json
+      description: 修改TCP服务
+      operationId: /service/service_update_tcp
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ServiceUpdateTCPInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+      summary: 修改TCP服务
       tags:
       - 服务管理
 swagger: "2.0"
