@@ -26,6 +26,9 @@ func ServiceRegister(group *gin.RouterGroup) {
 
 	group.POST("/service_add_tcp", service.ServiceAddTCP)
 	group.POST("/service_update_tcp", service.ServiceUpdateTCP)
+
+	group.POST("/service_add_grpc", service.ServiceAddGRPC)
+	group.POST("/service_update_grpc", service.ServiceUpdateGRPC)
 }
 
 // ServiceList godoc
@@ -491,6 +494,208 @@ func (service *ServiceController) ServiceUpdateTCP(c *gin.Context) {
 	info := serviceDetail.Info
 	info.ServiceDesc = params.ServiceDesc
 	if err := info.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2005, err)
+		return
+	}
+
+	tcpRule := &dao.TcpRule{}
+	if serviceDetail.TCPRule != nil {
+		tcpRule = serviceDetail.TCPRule
+	}
+	tcpRule.ServiceID = info.ID
+	tcpRule.Port = params.Port
+	if err := tcpRule.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2006, err)
+		return
+	}
+	accessControl := serviceDetail.AccessControl
+	accessControl.OpenAuth = params.OpenAuth
+	accessControl.BlackList = params.BlackList
+	accessControl.WhiteList = params.WhiteList
+	accessControl.ClientIPFlowLimit = params.ClientIPFlowLimit
+	accessControl.ServiceFlowLimit = params.ServiceFlowLimit
+	if err := accessControl.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2007, err)
+		return
+	}
+
+	loadbalance := serviceDetail.LoadBalance
+	loadbalance.RoundType = params.RoundType
+	loadbalance.IpList = params.IpList
+	loadbalance.WeightList = params.WeightList
+	if err := loadbalance.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2008, err)
+		return
+	}
+	tx.Commit()
+	middleware.ResponseSuccess(c, "")
+}
+
+// ServiceAddGRPC godoc
+// @Summary 添加GRPC服务
+// @Description 添加GRPC服务
+// @Tags 服务管理
+// @ID /service/service_add_grpc
+// @Accept  json
+// @Produce  json
+// @Param body body dto.ServiceAddGRPCInput true "body"
+// @Success 200 {object} middleware.Response{data=string} "success"
+// @Router /service/service_add_grpc [post]
+func (service *ServiceController) ServiceAddGRPC(c *gin.Context) {
+	params := &dto.ServiceAddGRPCInput{}
+	if err := params.BindValidParam(c); err != nil {
+		middleware.ResponseError(c, 2000, err)
+		return
+	}
+	tx, err := lib.GetGormPool("default")
+	if err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+	if len(strings.Split(params.IpList, ",")) != len(strings.Split(params.WeightList, ",")) {
+		middleware.ResponseError(c, 2004, errors.New("IP列表与权重列表数量不一致"))
+		return
+	}
+	tx = tx.Begin()
+	serviceInfo := &dao.ServiceInfo{ServiceName: params.ServiceName}
+	if _, err = serviceInfo.Find(c, tx, serviceInfo); err == nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2002, errors.New("服务名被占用，请重新输入"))
+		return
+	}
+
+	tcpPost := &dao.TcpRule{Port: params.Port}
+	if _, err = tcpPost.Find(c, tx, tcpPost); err == nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2003, errors.New("服务端口被占用"))
+		return
+	}
+
+	grpcPost := &dao.GrpcRule{
+		Port: params.Port,
+	}
+	if _, err = grpcPost.Find(c, tx, grpcPost); err == nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2005, errors.New("服务端口被占用"))
+		return
+	}
+	serviceModel := &dao.ServiceInfo{
+		LoadType:    public.LoadTypeGRPC,
+		ServiceName: params.ServiceName,
+		ServiceDesc: params.ServiceDesc,
+	}
+	if err := serviceModel.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2006, err)
+		return
+	}
+
+	grpcRule := &dao.GrpcRule{
+		ServiceID:      serviceModel.ID,
+		Port:           params.Port,
+		HeaderTransfor: params.HeaderTransfor,
+	}
+
+	if err := grpcRule.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2007, err)
+		return
+	}
+	accessControl := &dao.AccessControl{
+		ServiceID:         serviceModel.ID,
+		OpenAuth:          params.OpenAuth,
+		BlackList:         params.BlackList,
+		WhiteList:         params.WhiteList,
+		WhiteHostName:     params.WhiteHostName,
+		ClientIPFlowLimit: params.ClientIPFlowLimit,
+		ServiceFlowLimit:  params.ServiceFlowLimit,
+	}
+
+	if err := accessControl.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2008, err)
+		return
+	}
+
+	loadBalance := &dao.LoadBalance{
+		ServiceID:  serviceModel.ID,
+		RoundType:  params.RoundType,
+		IpList:     params.IpList,
+		WeightList: params.WeightList,
+		ForbidList: params.ForbidList,
+	}
+	if err := loadBalance.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2009, err)
+		return
+	}
+	tx.Commit()
+	middleware.ResponseSuccess(c, "")
+}
+
+// ServiceUpdateGRPC godoc
+// @Summary 修改GRPC服务
+// @Description 修改GRPC服务
+// @Tags 服务管理
+// @ID /service/service_update_grpc
+// @Accept  json
+// @Produce  json
+// @Param body body dto.ServiceUpdateGRPCInput true "body"
+// @Success 200 {object} middleware.Response{data=string} "success"
+// @Router /service/service_update_grpc [post]
+func (service *ServiceController) ServiceUpdateGRPC(c *gin.Context) {
+	params := &dto.ServiceUpdateGRPCInput{}
+	if err := params.BindValidParam(c); err != nil {
+		middleware.ResponseError(c, 2000, err)
+		return
+	}
+
+	if len(strings.Split(params.IpList, ",")) != len(strings.Split(params.WhiteList, ",")) {
+		middleware.ResponseError(c, 2001, errors.New("IP列表与权重列表数量不一致"))
+		return
+	}
+	tx, err := lib.GetGormPool("default")
+	if err != nil {
+		middleware.ResponseError(c, 2002, err)
+		return
+	}
+	tx = tx.Begin()
+
+	serviceInfo := &dao.ServiceInfo{ID: params.ID}
+	serviceInfo, err = serviceInfo.Find(c, tx, serviceInfo)
+	if err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2003, errors.New("服务不存在"))
+		return
+	}
+
+	serviceDetail, err := serviceInfo.ServiceDetail(c, tx, serviceInfo)
+	if err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2004, errors.New("服务详情不存在"))
+		return
+	}
+
+	info := serviceDetail.Info
+	info.ServiceDesc = params.ServiceDesc
+	if err := info.Save(c, tx); err != nil {
+		tx.Rollback()
+		middleware.ResponseError(c, 2005, err)
+		return
+	}
+
+	grpcRule := &dao.GrpcRule{}
+	if serviceDetail.GRPCRule != nil {
+		grpcRule = serviceDetail.GRPCRule
+	}
+	grpcRule.ServiceID = info.ID
+	grpcRule.Port = params.Port
+	grpcRule.HeaderTransfor = params.HeaderTransfor
+	if err := grpcRule.Save(c, tx); err != nil {
 		tx.Rollback()
 		middleware.ResponseError(c, 2005, err)
 		return
