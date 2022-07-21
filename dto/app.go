@@ -35,3 +35,19 @@ type APPListOutput struct {
 	List  []APPListItemOutput `json:"list" form:"list" comment:"租户列表"`
 	Total int64               `json:"total" form:"total" comment:"租户总数"`
 }
+
+type APPDetailInput struct {
+	ID int64 `json:"id" form:"id" comment:"租户ID" validate:"required"`
+}
+
+func (params *APPDetailInput) GetValidParams(c *gin.Context) error {
+	return public.DefaultGetValidParams(c, params)
+}
+
+type APPDeleteInput struct {
+	ID int64 `json:"id" form:"id" comment:"租户ID" validate:"required"`
+}
+
+func (params *APPDeleteInput) GetValidParams(c *gin.Context) error {
+	return public.DefaultGetValidParams(c, params)
+}

@@ -63,3 +63,64 @@ func (admin *APPController) APPList(c *gin.Context) {
 	middleware.ResponseSuccess(c, output)
 	return
 }
+
+// APPDetail godoc
+// @Summary 租户详情
+// @Description 租户详情
+// @Tags 租户管理
+// @ID /app/app_detail
+// @Accept  json
+// @Produce  json
+// @Param id query string true "租户ID"
+// @Success 200 {object} middleware.Response{data=dao.App} "success"
+// @Router /app/app_detail [get]
+func (admin *APPController) APPDetail(c *gin.Context) {
+	params := &dto.APPDetailInput{}
+	if err := params.GetValidParams(c); err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+	search := &dao.App{
+		ID: params.ID,
+	}
+	detail, err := search.Find(c, lib.GORMDefaultPool, search)
+	if err != nil {
+		middleware.ResponseError(c, 2002, err)
+		return
+	}
+	middleware.ResponseSuccess(c, detail)
+	return
+}
+
+// APPDelete godoc
+// @Summary 租户删除
+// @Description 租户删除
+// @Tags 租户管理
+// @ID /app/app_delete
+// @Accept  json
+// @Produce  json
+// @Param id query string true "租户ID"
+// @Success 200 {object} middleware.Response{data=string} "success"
+// @Router /app/app_delete [get]
+func (admin *APPController) APPDelete(c *gin.Context) {
+	params := &dto.APPDetailInput{}
+	if err := params.GetValidParams(c); err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+	search := &dao.App{
+		ID: params.ID,
+	}
+	info, err := search.Find(c, lib.GORMDefaultPool, search)
+	if err != nil {
+		middleware.ResponseError(c, 2002, err)
+		return
+	}
+	info.IsDelete = 1
+	if err := info.Save(c, lib.GORMDefaultPool); err != nil {
+		middleware.ResponseError(c, 2003, err)
+		return
+	}
+	middleware.ResponseSuccess(c, "")
+	return
+}
