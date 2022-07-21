@@ -52,7 +52,7 @@ func (params *APPDeleteInput) GetValidParams(c *gin.Context) error {
 	return public.DefaultGetValidParams(c, params)
 }
 
-type APPAddAppInput struct {
+type AppAddAppInput struct {
 	AppID    string `json:"app_id" form:"app_id" comment:"租户id" validate:"required"`
 	Name     string `json:"name" form:"name" comment:"租户名称" validate:"required"`
 	Secret   string `json:"secret" form:"secret" comment:"密钥" validate:""`
@@ -61,6 +61,19 @@ type APPAddAppInput struct {
 	Qps      int64  `json:"qps" form:"qps" comment:"每秒请求量限制" validate:""`
 }
 
-func (params *APPAddAppInput) GetValidParams(c *gin.Context) error {
+func (params *AppAddAppInput) GetValidParams(c *gin.Context) error {
 	return public.DefaultGetValidParams(c, params)
+}
+
+type APPStatisticsInput struct {
+	ID int64 `json:"id" form:"id" comment:"租户ID" validate:"required"`
+}
+
+func (params *APPStatisticsInput) GetValidParams(c *gin.Context) error {
+	return public.DefaultGetValidParams(c, params)
+}
+
+type APPStatisticsOutput struct {
+	Today     []int64 `json:"today" form:"today" comment:"今日统计" validate:"required"`
+	Yesterday []int64 `json:"yesterday" form:"yesterday" comment:"昨日统计" validate:"required"`
 }
