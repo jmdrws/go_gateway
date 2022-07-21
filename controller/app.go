@@ -18,7 +18,7 @@ func APPRegister(router *gin.RouterGroup) {
 	router.GET("/app_stat", app.AppStatistics)
 	router.GET("/app_delete", app.APPDelete)
 	router.POST("/app_add", app.AppAdd)
-	//router.POST("/app_update", app.AppUpdate)
+	router.POST("/app_update", app.AppUpdate)
 }
 
 type APPController struct {
@@ -79,7 +79,7 @@ func (admin *APPController) APPList(c *gin.Context) {
 // @ID /app/app_detail
 // @Accept  json
 // @Produce  json
-// @Param id query string true "租户ID"
+// @Param id query int true "租户ID"
 // @Success 200 {object} middleware.Response{data=dao.App} "success"
 // @Router /app/app_detail [get]
 func (admin *APPController) APPDetail(c *gin.Context) {
@@ -140,11 +140,11 @@ func (admin *APPController) APPDelete(c *gin.Context) {
 // @ID /app/app_add
 // @Accept  json
 // @Produce  json
-// @Param body body dto.AppAddAppInput true "body"
+// @Param body body dto.AppAddInput true "body"
 // @Success 200 {object} middleware.Response{data=string} "success"
 // @Router /app/app_add [post]
 func (admin *APPController) AppAdd(c *gin.Context) {
-	params := &dto.AppAddAppInput{}
+	params := &dto.AppAddInput{}
 	if err := params.GetValidParams(c); err != nil {
 		middleware.ResponseError(c, 2001, err)
 		return
@@ -178,6 +178,47 @@ func (admin *APPController) AppAdd(c *gin.Context) {
 	return
 }
 
+// AppUpdate godoc
+// @Summary 租户更新
+// @Description 租户更新
+// @Tags 租户管理
+// @ID /app/app_update
+// @Accept  json
+// @Produce  json
+// @Param body body dto.APPUpdateInput true "body"
+// @Success 200 {object} middleware.Response{data=string} "success"
+// @Router /app/app_update [post]
+func (admin *APPController) AppUpdate(c *gin.Context) {
+	params := &dto.APPUpdateInput{}
+	if err := params.GetValidParams(c); err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+	search := &dao.App{
+		ID: params.ID,
+	}
+	info, err := search.Find(c, lib.GORMDefaultPool, search)
+	if err != nil {
+		middleware.ResponseError(c, 2002, err)
+		return
+	}
+	if params.Secret == "" {
+		//params.Secret = public.MD5(params.AppID)
+		params.Secret = info.Secret
+	}
+	info.Name = params.Name
+	info.Secret = params.Secret
+	info.WhiteIPS = params.WhiteIPS
+	info.Qps = params.Qps
+	info.Qpd = params.Qpd
+	if err := info.Save(c, lib.GORMDefaultPool); err != nil {
+		middleware.ResponseError(c, 2003, err)
+		return
+	}
+	middleware.ResponseSuccess(c, "")
+	return
+}
+
 // AppStatistics godoc
 // @Summary 租户统计
 // @Description 租户统计
@@ -186,7 +227,7 @@ func (admin *APPController) AppAdd(c *gin.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id query string true "租户ID"
-// @Success 200 {object} middleware.Response{data=dto.StatisticsOutput} "success"
+// @Success 200 {object} middleware.Response{data=dto.APPStatisticsOutput} "success"
 // @Router /app/app_stat [get]
 func (admin *APPController) AppStatistics(c *gin.Context) {
 	params := &dto.APPStatisticsInput{}

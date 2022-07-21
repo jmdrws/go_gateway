@@ -182,6 +182,293 @@ const docTemplate = `{
                 }
             }
         },
+        "/app/app_add": {
+            "post": {
+                "description": "租户添加",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租户管理"
+                ],
+                "summary": "租户添加",
+                "operationId": "/app/app_add",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AppAddInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/middleware.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/app/app_delete": {
+            "get": {
+                "description": "租户删除",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租户管理"
+                ],
+                "summary": "租户删除",
+                "operationId": "/app/app_delete",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "租户ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/middleware.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/app/app_detail": {
+            "get": {
+                "description": "租户详情",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租户管理"
+                ],
+                "summary": "租户详情",
+                "operationId": "/app/app_detail",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "租户ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/middleware.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dao.App"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/app/app_list": {
+            "get": {
+                "description": "租户列表",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租户管理"
+                ],
+                "summary": "租户列表",
+                "operationId": "/app/app_list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "关键词",
+                        "name": "info",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "每页多少条",
+                        "name": "page_size",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页码",
+                        "name": "page_no",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/middleware.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.APPListOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/app/app_stat": {
+            "get": {
+                "description": "租户统计",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租户管理"
+                ],
+                "summary": "租户统计",
+                "operationId": "/app/app_stat",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "租户ID",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/middleware.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.APPStatisticsOutput"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/app/app_update": {
+            "post": {
+                "description": "租户更新",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "租户管理"
+                ],
+                "summary": "租户更新",
+                "operationId": "/app/app_update",
+                "parameters": [
+                    {
+                        "description": "body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.APPUpdateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "success",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/middleware.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
         "/service/service_add_grpc": {
             "post": {
                 "description": "添加GRPC服务",
@@ -688,6 +975,41 @@ const docTemplate = `{
                 }
             }
         },
+        "dao.App": {
+            "type": "object",
+            "properties": {
+                "app_id": {
+                    "type": "string"
+                },
+                "create_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_delete": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "qpd": {
+                    "type": "integer"
+                },
+                "qps": {
+                    "type": "integer"
+                },
+                "secret": {
+                    "type": "string"
+                },
+                "update_at": {
+                    "type": "string"
+                },
+                "white_ips": {
+                    "type": "string"
+                }
+            }
+        },
         "dao.GrpcRule": {
             "type": "object",
             "properties": {
@@ -844,6 +1166,113 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.APPListItemOutput": {
+            "type": "object",
+            "properties": {
+                "app_id": {
+                    "type": "string"
+                },
+                "create_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_delete": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "qpd": {
+                    "type": "integer"
+                },
+                "qps": {
+                    "type": "integer"
+                },
+                "real_qpd": {
+                    "type": "integer"
+                },
+                "real_qps": {
+                    "type": "integer"
+                },
+                "secret": {
+                    "type": "string"
+                },
+                "update_at": {
+                    "type": "string"
+                },
+                "white_ips": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.APPListOutput": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.APPListItemOutput"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.APPStatisticsOutput": {
+            "type": "object",
+            "required": [
+                "today",
+                "yesterday"
+            ],
+            "properties": {
+                "today": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "yesterday": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "dto.APPUpdateInput": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "secret"
+            ],
+            "properties": {
+                "app_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "qpd": {
+                    "type": "integer"
+                },
+                "qps": {
+                    "type": "integer"
+                },
+                "secret": {
+                    "type": "string"
+                },
+                "white_ips": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.AdminInfoOutput": {
             "type": "object",
             "properties": {
@@ -896,6 +1325,33 @@ const docTemplate = `{
                     "description": "token",
                     "type": "string",
                     "example": "token"
+                }
+            }
+        },
+        "dto.AppAddInput": {
+            "type": "object",
+            "required": [
+                "app_id",
+                "name"
+            ],
+            "properties": {
+                "app_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "qpd": {
+                    "type": "integer"
+                },
+                "qps": {
+                    "type": "integer"
+                },
+                "secret": {
+                    "type": "string"
+                },
+                "white_ips": {
+                    "type": "string"
                 }
             }
         },
