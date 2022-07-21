@@ -24,8 +24,8 @@ type APPController struct {
 // @Accept  json
 // @Produce  json
 // @Param info query string false "关键词"
-// @Param page_size query string true "每页多少条"
-// @Param page_no query string true "页码"
+// @Param page_size query int true "每页多少条"
+// @Param page_no query int true "页码"
 // @Success 200 {object} middleware.Response{data=dto.APPListOutput} "success"
 // @Router /app/app_list [get]
 func (admin *APPController) APPList(c *gin.Context) {
