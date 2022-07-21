@@ -51,3 +51,16 @@ type APPDeleteInput struct {
 func (params *APPDeleteInput) GetValidParams(c *gin.Context) error {
 	return public.DefaultGetValidParams(c, params)
 }
+
+type APPAddAppInput struct {
+	AppID    string `json:"app_id" form:"app_id" comment:"租户id" validate:"required"`
+	Name     string `json:"name" form:"name" comment:"租户名称" validate:"required"`
+	Secret   string `json:"secret" form:"secret" comment:"密钥" validate:""`
+	WhiteIPS string `json:"white_ips" form:"white_ips" comment:"ip白名单，支持前缀匹配"`
+	Qpd      int64  `json:"qpd" form:"qpd" comment:"日请求量限制" validate:""`
+	Qps      int64  `json:"qps" form:"qps" comment:"每秒请求量限制" validate:""`
+}
+
+func (params *APPAddAppInput) GetValidParams(c *gin.Context) error {
+	return public.DefaultGetValidParams(c, params)
+}
