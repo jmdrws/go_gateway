@@ -100,3 +100,11 @@ func (t *ServiceInfo) Find(c *gin.Context, tx *gorm.DB, search *ServiceInfo) (*S
 func (t *ServiceInfo) Save(c *gin.Context, tx *gorm.DB) error {
 	return tx.WithContext(c).Save(t).Error
 }
+
+func (t *ServiceInfo) GroupByLoadType(c *gin.Context, tx *gorm.DB) ([]dto.DashServiceStatItemOutput, error) {
+	var list []dto.DashServiceStatItemOutput
+	if err := tx.WithContext(c).Table(t.TableName()).Where("is_delete = 0").Select("load_type,count(*) as value").Group("load_type").Scan(&list).Error; err != nil {
+		return nil, err
+	}
+	return list, nil
+}
