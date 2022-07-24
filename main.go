@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/e421083458/golang_common/lib"
+	"github.com/jmdrws/go_gateway/http_proxy_router"
 	"github.com/jmdrws/go_gateway/router"
 	"os"
 	"os/signal"
@@ -41,12 +42,19 @@ func main() {
 	} else {
 		lib.InitModule(*config, []string{"base", "mysql", "redis"})
 		defer lib.Destroy()
-
+		go func() {
+			http_proxy_router.HttpServerRun()
+		}()
+		go func() {
+			http_proxy_router.HttpsServerRun()
+		}()
 		fmt.Println("start service")
 		//todo
 
 		quit := make(chan os.Signal)
 		signal.Notify(quit, syscall.SIGKILL, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 		<-quit
+		http_proxy_router.HttpServerStop()
+		http_proxy_router.HttpsServerStop()
 	}
 }

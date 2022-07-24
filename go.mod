@@ -1,6 +1,6 @@
 module github.com/jmdrws/go_gateway
 
-go 1.14
+go 1.12
 
 require (
 	github.com/BurntSushi/toml v1.1.0 // indirect
