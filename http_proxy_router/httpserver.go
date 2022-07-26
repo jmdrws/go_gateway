@@ -5,6 +5,7 @@ import (
 	"github.com/e421083458/golang_common/lib"
 	"github.com/gin-gonic/gin"
 	"github.com/jmdrws/go_gateway/cert_file"
+	"github.com/jmdrws/go_gateway/middleware"
 	"log"
 	"net/http"
 	"time"
@@ -17,7 +18,10 @@ var (
 
 func HttpServerRun() {
 	gin.SetMode(lib.GetStringConf("proxy.base.debug_mode"))
-	r := InitRouter()
+	r := InitRouter(
+		middleware.RecoveryMiddleware(),
+		middleware.RequestLog(),
+	)
 	HttpSrvHandler = &http.Server{
 		Addr:           lib.GetStringConf("proxy.http.addr"),
 		Handler:        r,
@@ -33,7 +37,10 @@ func HttpServerRun() {
 
 func HttpsServerRun() {
 	gin.SetMode(lib.GetStringConf("proxy.base.debug_mode"))
-	r := InitRouter()
+	r := InitRouter(
+		middleware.RecoveryMiddleware(),
+		middleware.RequestLog(),
+	)
 	HttpsSrvHandler = &http.Server{
 		Addr:           lib.GetStringConf("proxy.https.addr"),
 		Handler:        r,
