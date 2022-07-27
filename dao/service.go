@@ -1,10 +1,14 @@
 package dao
 
 import (
+	"errors"
+	"fmt"
 	"github.com/e421083458/golang_common/lib"
 	"github.com/gin-gonic/gin"
 	"github.com/jmdrws/go_gateway/dto"
+	"github.com/jmdrws/go_gateway/public"
 	"net/http/httptest"
+	"strings"
 	"sync"
 )
 
@@ -44,7 +48,28 @@ func (s *ServiceManager) HTTPAccessMode(c *gin.Context) (*ServiceDetail, error) 
 	//2、域名匹配 www.test.com ==> serviceSlice.rule
 	//host c.Request.Host
 	//path c.Request.URL.Path
-	return nil, nil
+
+	host := c.Request.Host
+	host = host[0:strings.Index(host, ":")]
+	fmt.Println("host:", host)
+	path := c.Request.URL.Path
+
+	for _, serviceItem := range s.ServiceSlice {
+		if serviceItem.Info.LoadType != public.LoadTypeHTTP {
+			continue
+		}
+		if serviceItem.HTTPRule.RuleType == public.HTTPRuleTypeDomain {
+			if serviceItem.HTTPRule.Rule == host {
+				return serviceItem, nil
+			}
+		}
+		if serviceItem.HTTPRule.RuleType == public.HTTPRuleTypePrefixURL {
+			if strings.HasPrefix(path, serviceItem.HTTPRule.Rule) {
+				return serviceItem, nil
+			}
+		}
+	}
+	return nil, errors.New("not matched service")
 }
 
 func (s *ServiceManager) LoadOnce() error {
@@ -68,7 +93,8 @@ func (s *ServiceManager) LoadOnce() error {
 		s.Locker.Lock()
 		defer s.Locker.Unlock()
 		for _, listItem := range list {
-			serviceDetail, err := listItem.ServiceDetail(c, tx, &listItem)
+			tempItem := listItem
+			serviceDetail, err := tempItem.ServiceDetail(c, tx, &tempItem)
 			if err != nil {
 				s.err = err
 				return

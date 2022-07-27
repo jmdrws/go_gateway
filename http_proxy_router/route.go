@@ -2,6 +2,7 @@ package http_proxy_router
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/jmdrws/go_gateway/http_proxy_middleware"
 )
 
 func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
@@ -12,5 +13,6 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 			"message": "pong",
 		})
 	})
+	router.Use(http_proxy_middleware.HTTPAccessModeMiddleware())
 	return router
 }

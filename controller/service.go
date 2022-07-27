@@ -191,7 +191,7 @@ func (service *ServiceController) ServiceAddHTTP(c *gin.Context) {
 	}
 
 	httpUrl := &dao.HttpRule{RuleType: params.RuleType, Rule: params.Rule}
-	if _, err = httpUrl.Find(c, tx, httpUrl); err == nil {
+	if _, err = httpUrl.FindOnce(c, tx, httpUrl); err == nil {
 		tx.Rollback()
 		middleware.ResponseError(c, 2003, errors.New("服务接入前缀或域名已存在"))
 		return

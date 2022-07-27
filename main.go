@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/e421083458/golang_common/lib"
+	"github.com/jmdrws/go_gateway/dao"
 	"github.com/jmdrws/go_gateway/http_proxy_router"
 	"github.com/jmdrws/go_gateway/router"
 	"os"
@@ -42,6 +43,7 @@ func main() {
 	} else {
 		lib.InitModule(*config, []string{"base", "mysql", "redis"})
 		defer lib.Destroy()
+		dao.ServiceManagerHandler.LoadOnce()
 		go func() {
 			http_proxy_router.HttpServerRun()
 		}()
