@@ -1,9 +1,16 @@
 package dao
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/jmdrws/go_gateway/public"
+	"github.com/jmdrws/go_gateway/reverse_proxy/load_balance"
 	"gorm.io/gorm"
+	"net"
+	"net/http"
 	"strings"
+	"sync"
+	"time"
 )
 
 type LoadBalance struct {
@@ -42,4 +49,143 @@ func (t *LoadBalance) Save(c *gin.Context, tx *gorm.DB) error {
 
 func (t *LoadBalance) GetIPListByModel() []string {
 	return strings.Split(t.IpList, ",")
+}
+
+func (t *LoadBalance) GetWeightListByModel() []string {
+	return strings.Split(t.WeightList, ",")
+}
+
+type LoadBalancer struct {
+	LoadBalanceMap   map[string]*LoadBalancerItem
+	LoadBalanceSlice []*LoadBalancerItem
+	Locker           sync.RWMutex
+}
+
+var LoadBalancerHandler *LoadBalancer
+
+type LoadBalancerItem struct {
+	LoadBalance load_balance.LoadBalance
+	serviceName string
+}
+
+func NewLoadBalancer() *LoadBalancer {
+	return &LoadBalancer{
+		LoadBalanceMap:   map[string]*LoadBalancerItem{},
+		LoadBalanceSlice: []*LoadBalancerItem{},
+		Locker:           sync.RWMutex{},
+	}
+}
+
+func init() {
+	LoadBalancerHandler = NewLoadBalancer()
+}
+
+func (lbr *LoadBalancer) GetLoadBalancer(service *ServiceDetail) (load_balance.LoadBalance, error) {
+	for _, lbrItem := range lbr.LoadBalanceSlice {
+		if lbrItem.serviceName == service.Info.ServiceName {
+			return lbrItem.LoadBalance, nil
+		}
+	}
+	schema := "http://"
+	if service.HTTPRule.NeedHttps == 1 {
+		schema = "https://"
+	}
+	if service.Info.LoadType == public.LoadTypeTCP || service.Info.LoadType == public.LoadTypeGRPC {
+		schema = ""
+	}
+	ipList := service.LoadBalance.GetIPListByModel()
+	weightList := service.LoadBalance.GetWeightListByModel()
+	ipConf := map[string]string{}
+	for ipIndex, ipItem := range ipList {
+		ipConf[ipItem] = weightList[ipIndex]
+	}
+	mConf, err := load_balance.NewLoadBalanceCheckConf(fmt.Sprintf("%s%s", schema, "%s"), ipConf)
+	if err != nil {
+		return nil, err
+	}
+	lb := load_balance.LoadBanlanceFactorWithConf(load_balance.LbType(service.LoadBalance.RoundType), mConf)
+
+	//save to map and slice
+	lbItem := &LoadBalancerItem{
+		LoadBalance: lb,
+		serviceName: service.Info.ServiceName,
+	}
+	lbr.LoadBalanceSlice = append(lbr.LoadBalanceSlice, lbItem)
+
+	lbr.Locker.Lock()
+	defer lbr.Locker.Unlock()
+	lbr.LoadBalanceMap[service.Info.ServiceName] = lbItem
+	return lb, nil
+
+}
+
+var TransporterHandler *Transporter
+
+type Transporter struct {
+	TransportMap   map[string]*TransportItem
+	TransportSlice []*TransportItem
+	Locker         sync.RWMutex
+}
+
+type TransportItem struct {
+	Trans       *http.Transport
+	ServiceName string
+}
+
+func NewTransportor() *Transporter {
+	return &Transporter{
+		TransportMap:   map[string]*TransportItem{},
+		TransportSlice: []*TransportItem{},
+		Locker:         sync.RWMutex{},
+	}
+}
+
+func init() {
+	TransporterHandler = NewTransportor()
+}
+
+func (t *Transporter) GetTrans(service *ServiceDetail) (*http.Transport, error) {
+	for _, transItem := range t.TransportSlice {
+		if transItem.ServiceName == service.Info.ServiceName {
+			return transItem.Trans, nil
+		}
+	}
+
+	//todo 优化点5
+	if service.LoadBalance.UpstreamConnectTimeout == 0 {
+		service.LoadBalance.UpstreamConnectTimeout = 30
+	}
+	if service.LoadBalance.UpstreamMaxIdle == 0 {
+		service.LoadBalance.UpstreamMaxIdle = 100
+	}
+	if service.LoadBalance.UpstreamIdleTimeout == 0 {
+		service.LoadBalance.UpstreamIdleTimeout = 90
+	}
+	if service.LoadBalance.UpstreamHeaderTimeout == 0 {
+		service.LoadBalance.UpstreamHeaderTimeout = 30
+	}
+	trans := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   time.Duration(service.LoadBalance.UpstreamConnectTimeout) * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		ForceAttemptHTTP2:     true,
+		MaxIdleConns:          service.LoadBalance.UpstreamMaxIdle,
+		IdleConnTimeout:       time.Duration(service.LoadBalance.UpstreamIdleTimeout) * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ResponseHeaderTimeout: time.Duration(service.LoadBalance.UpstreamHeaderTimeout) * time.Second,
+	}
+
+	//save to map and slice
+	transItem := &TransportItem{
+		Trans:       trans,
+		ServiceName: service.Info.ServiceName,
+	}
+	t.TransportSlice = append(t.TransportSlice, transItem)
+	t.Locker.Lock()
+	defer t.Locker.Unlock()
+	t.TransportMap[service.Info.ServiceName] = transItem
+	return trans, nil
 }
