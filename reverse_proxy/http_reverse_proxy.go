@@ -1,6 +1,7 @@
 package reverse_proxy
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jmdrws/go_gateway/middleware"
 	"github.com/jmdrws/go_gateway/reverse_proxy/load_balance"
@@ -14,6 +15,7 @@ func NewLoadBalanceReverseProxy(c *gin.Context, lb load_balance.LoadBalance, tra
 	//请求协调者
 	director := func(req *http.Request) {
 		nextAddr, err := lb.Get(req.URL.String())
+		fmt.Println("nextAddr ", nextAddr)
 		//todo 优化点3
 		if err != nil || nextAddr == "" {
 			panic("get next addr fail")

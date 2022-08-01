@@ -165,13 +165,13 @@ func (t *Transporter) GetTrans(service *ServiceDetail) (*http.Transport, error) 
 		service.LoadBalance.UpstreamHeaderTimeout = 30
 	}
 	trans := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
+		//Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
-			Timeout:   time.Duration(service.LoadBalance.UpstreamConnectTimeout) * time.Second,
-			KeepAlive: 30 * time.Second,
-			DualStack: true,
+			Timeout: time.Duration(service.LoadBalance.UpstreamConnectTimeout) * time.Second,
+			//KeepAlive: 30 * time.Second,
+			//DualStack: true,
 		}).DialContext,
-		ForceAttemptHTTP2:     true,
+		//ForceAttemptHTTP2:     true,
 		MaxIdleConns:          service.LoadBalance.UpstreamMaxIdle,
 		IdleConnTimeout:       time.Duration(service.LoadBalance.UpstreamIdleTimeout) * time.Second,
 		TLSHandshakeTimeout:   10 * time.Second,
