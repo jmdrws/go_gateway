@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+//Head头转换
 func HTTPHeaderTransferMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		serverInterface, ok := c.Get("service")
