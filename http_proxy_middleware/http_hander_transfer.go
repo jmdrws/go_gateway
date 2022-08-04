@@ -30,6 +30,7 @@ func HTTPHeaderTransferMiddleware() gin.HandlerFunc {
 				c.Request.Header.Del(items[1])
 			}
 		}
+
 		c.Next()
 	}
 }
