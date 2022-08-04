@@ -275,7 +275,7 @@ func (service *ServiceController) ServiceUpdateHTTP(c *gin.Context) {
 		return
 	}
 
-	if len(strings.Split(params.IpList, ",")) != len(strings.Split(params.WhiteList, ",")) {
+	if len(strings.Split(params.IpList, ",")) != len(strings.Split(params.WeightList, ",")) {
 		middleware.ResponseError(c, 2001, errors.New("IP列表与权重列表数量不一致"))
 		return
 	}
