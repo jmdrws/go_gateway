@@ -29,3 +29,13 @@ func Obj2Json(s interface{}) string {
 	marshal, _ := json.Marshal(s)
 	return string(marshal)
 }
+
+//判断是否存在于切片中
+func InStringSlice(slice []string, str string) bool {
+	for _, item := range slice {
+		if item == str {
+			return true
+		}
+	}
+	return false
+}
