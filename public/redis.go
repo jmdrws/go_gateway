@@ -2,7 +2,7 @@ package public
 
 import (
 	"github.com/e421083458/golang_common/lib"
-	"github.com/garyburd/redigo/redis"
+	"github.com/gomodule/redigo/redis"
 )
 
 func RedisConfPipline(pip ...func(c redis.Conn)) error {

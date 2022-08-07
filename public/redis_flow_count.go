@@ -3,7 +3,7 @@ package public
 import (
 	"fmt"
 	"github.com/e421083458/golang_common/lib"
-	"github.com/garyburd/redigo/redis"
+	"github.com/gomodule/redigo/redis"
 	"sync/atomic"
 	"time"
 )

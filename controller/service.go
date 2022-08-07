@@ -99,14 +99,19 @@ func (service *ServiceController) ServiceList(c *gin.Context) {
 		if serviceDetail.Info.LoadType == public.LoadTypeGRPC {
 			serviceAddr = fmt.Sprintf("%s:%d", clusterIP, serviceDetail.GRPCRule.Port)
 		}
+		counter, err := public.FlowCounterHandler.GetCounter(public.FlowServicePrefix + listItem.ServiceName)
+		if err != nil {
+			middleware.ResponseError(c, 2004, err)
+			return
+		}
 		ipList := serviceDetail.LoadBalance.GetIPListByModel()
 		outItem := dto.ServiceListItemOutput{
 			ID:          listItem.ID,
 			ServiceName: listItem.ServiceName,
 			ServiceDesc: listItem.ServiceDesc,
 			ServiceAddr: serviceAddr,
-			Qps:         0,
-			Qpd:         0,
+			Qps:         counter.QPS,
+			Qpd:         counter.TotalCount,
 			TotalNode:   len(ipList),
 		}
 		outList = append(outList, outItem)
