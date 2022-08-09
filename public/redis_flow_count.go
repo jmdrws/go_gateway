@@ -97,5 +97,6 @@ func (o *RedisFlowCountService) Increase() {
 			}
 		}()
 		atomic.AddInt64(&o.TickerCount, 1)
+		fmt.Println("TickerCount---------->", o.TickerCount)
 	}()
 }
