@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/e421083458/golang_common/lib"
 	"github.com/jmdrws/go_gateway/dao"
 	"github.com/jmdrws/go_gateway/http_proxy_router"
@@ -50,7 +49,7 @@ func main() {
 		go func() {
 			http_proxy_router.HttpsServerRun()
 		}()
-		fmt.Println("start service")
+		//fmt.Println("start service")
 		//todo
 
 		quit := make(chan os.Signal)

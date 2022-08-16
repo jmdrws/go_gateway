@@ -1,7 +1,6 @@
 package http_proxy_middleware
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jmdrws/go_gateway/dao"
 	"github.com/jmdrws/go_gateway/middleware"
@@ -29,8 +28,8 @@ func HTTPFlowCountMiddleware() gin.HandlerFunc {
 		}
 		totalCounter.Increase()
 
-		dayCount, _ := totalCounter.GetDayData(time.Now())
-		fmt.Printf("totalCounter qps:%v,dayCount:%v\n", totalCounter.QPS, dayCount)
+		_, _ = totalCounter.GetDayData(time.Now())
+		//fmt.Printf("totalCounter qps:%v,dayCount:%v\n", totalCounter.QPS, dayCount)
 		serviceCounter, err := public.FlowCounterHandler.GetCounter(public.FlowServicePrefix + serviceDetail.Info.ServiceName)
 		if err != nil {
 			middleware.ResponseError(c, 4001, err)
@@ -39,8 +38,8 @@ func HTTPFlowCountMiddleware() gin.HandlerFunc {
 		}
 		serviceCounter.Increase()
 
-		dayServiceCount, _ := serviceCounter.GetDayData(time.Now())
-		fmt.Printf("serviceCounter qps:%v,dayCount:%v", serviceCounter.QPS, dayServiceCount)
+		_, _ = serviceCounter.GetDayData(time.Now())
+		//fmt.Printf("serviceCounter qps:%v,dayCount:%v", serviceCounter.QPS, dayServiceCount)
 		c.Next()
 	}
 }

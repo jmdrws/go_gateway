@@ -6,7 +6,7 @@ import (
 )
 
 func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
-	router := gin.Default()
+	router := gin.New()
 	router.Use(middlewares...)
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{

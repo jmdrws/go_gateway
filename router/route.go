@@ -66,7 +66,9 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	docs.SwaggerInfo.BasePath = lib.GetStringConf("base.swagger.base_path")
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
-	router := gin.Default()
+	//减少IO操作，提高效率
+	//router := gin.Default()
+	router := gin.New()
 	router.Use(middlewares...)
 	router.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{

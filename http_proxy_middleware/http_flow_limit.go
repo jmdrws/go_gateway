@@ -33,7 +33,7 @@ func HTTPFlowLimitMiddleware() gin.HandlerFunc {
 			}
 		}
 
-		if serviceDetail.AccessControl.ClientIPFlowLimit > 0 {
+		if serviceDetail.AccessControl.ClientIPFlowLimit != 0 {
 			clientLimit, err := public.FlowLimiterHandler.GetLimiter(
 				public.FlowServicePrefix+serviceDetail.Info.ServiceName+"_"+c.ClientIP(),
 				float64(serviceDetail.AccessControl.ClientIPFlowLimit),

@@ -1,11 +1,9 @@
 package http_proxy_middleware
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jmdrws/go_gateway/dao"
 	"github.com/jmdrws/go_gateway/middleware"
-	"github.com/jmdrws/go_gateway/public"
 )
 
 //匹配服务的接入方式  基于请求信息
@@ -17,7 +15,7 @@ func HTTPAccessModeMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		fmt.Println("matched service:", public.Obj2Json(service))
+		//fmt.Println("matched service:", public.Obj2Json(service))
 		c.Set("service", service)
 		c.Next()
 	}

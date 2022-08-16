@@ -1,7 +1,6 @@
 package http_proxy_middleware
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jmdrws/go_gateway/dao"
 	"github.com/jmdrws/go_gateway/middleware"
@@ -21,7 +20,7 @@ func HTTPUrlRewriteMiddleware() gin.HandlerFunc {
 		}
 		serviceDetail := serverInterface.(*dao.ServiceDetail)
 		for _, item := range strings.Split(serviceDetail.HTTPRule.UrlRewrite, ",") {
-			fmt.Println("item rewrite", item)
+			//fmt.Println("item rewrite", item)
 			items := strings.Split(item, " ")
 			if len(items) != 2 {
 				continue
@@ -30,10 +29,10 @@ func HTTPUrlRewriteMiddleware() gin.HandlerFunc {
 			if err != nil {
 				continue
 			}
-			fmt.Println("before rewrite", c.Request.URL.Path)
+			//fmt.Println("before rewrite", c.Request.URL.Path)
 			replacePath := regexp.ReplaceAll([]byte(c.Request.URL.Path), []byte(items[1]))
 			c.Request.URL.Path = string(replacePath)
-			fmt.Println("after rewrite", c.Request.URL.Path)
+			//fmt.Println("after rewrite", c.Request.URL.Path)
 		}
 		c.Next()
 	}
