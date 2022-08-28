@@ -17,7 +17,7 @@
 [log]
     log_level = "trace"         #日志打印最低级别
     [log.file_writer]           #文件写入配置
-        on = true
+        on = true               #当为true时，由于项目在运行时的并发可能会很大，因此在写文件的时候会占用大量的资源
         log_path = "./logs/gin_scaffold.inf.log"
         rotate_log_path = "./logs/go_gateway.inf.log.%Y%M%D%H"
         wf_log_path = "./logs/go_gateway.wf.log"
