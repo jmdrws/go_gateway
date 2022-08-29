@@ -15,8 +15,12 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 			"message": "pong",
 		})
 	})
-	root := router.Group("/")
-	root.Use(
+	oauth := router.Group("/oauth")
+	oauth.Use(middleware.TranslationMiddleware())
+	{
+		controller.OAuthRegister(oauth)
+	}
+	router.Use(
 		http_proxy_middleware.HTTPAccessModeMiddleware(),
 		http_proxy_middleware.HTTPFlowCountMiddleware(),
 		http_proxy_middleware.HTTPFlowLimitMiddleware(),
@@ -27,10 +31,6 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		http_proxy_middleware.HTTPUrlRewriteMiddleware(),
 		http_proxy_middleware.HTTPReverseProxyMiddleware(),
 	)
-	oauth := router.Group("/oauth")
-	oauth.Use(middleware.TranslationMiddleware())
-	{
-		controller.OAuthRegister(oauth)
-	}
+
 	return router
 }
