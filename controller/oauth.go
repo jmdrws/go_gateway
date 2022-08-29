@@ -4,11 +4,15 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/e421083458/golang_common/lib"
 	"github.com/gin-gonic/gin"
 	"github.com/jmdrws/go_gateway/dao"
 	"github.com/jmdrws/go_gateway/dto"
 	"github.com/jmdrws/go_gateway/middleware"
+	"github.com/jmdrws/go_gateway/public"
 	"strings"
+	"time"
 )
 
 type OAuthController struct {
@@ -67,7 +71,23 @@ func (oauth *OAuthController) Tokens(c *gin.Context) {
 	appList := dao.AppManagerHandler.GetAppList()
 	for _, appInfo := range appList {
 		if appInfo.AppID == parts[0] && appInfo.Secret == parts[1] {
-
+			claims := jwt.StandardClaims{
+				Issuer:    appInfo.AppID,
+				ExpiresAt: time.Now().Add(public.JwtExpires * time.Second).In(lib.TimeLocation).Unix(),
+			}
+			token, err := public.JwtEncode(claims)
+			if err != nil {
+				middleware.ResponseError(c, 2004, err)
+				return
+			}
+			output := &dto.TokensOutput{
+				ExpiresIn:   public.JwtExpires,
+				TokenType:   "Bearer",
+				AccessToken: token,
+				Scope:       "read_write",
+			}
+			middleware.ResponseSuccess(c, output)
+			return
 		}
 	}
 	middleware.ResponseError(c, 2005, errors.New("未匹配正确APP信息"))
