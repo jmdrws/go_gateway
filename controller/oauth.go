@@ -3,7 +3,6 @@ package controller
 import (
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/e421083458/golang_common/lib"
 	"github.com/gin-gonic/gin"
@@ -42,7 +41,7 @@ func (oauth *OAuthController) Tokens(c *gin.Context) {
 
 	middleware.ResponseSuccess(c, &dto.TokensOutput{})
 	//权限
-	splits := strings.Split(c.GetHeader("Authorization"), "")
+	splits := strings.Split(c.GetHeader("Authorization"), " ")
 	if len(splits) != 2 {
 		middleware.ResponseError(c, 2001, errors.New("用户名或密码格式错误"))
 		return
@@ -54,8 +53,8 @@ func (oauth *OAuthController) Tokens(c *gin.Context) {
 		return
 	}
 
-	fmt.Println("splits[1]", splits[1])
-	fmt.Println("appSecret", string(appSecret))
+	//fmt.Println("splits[1]", splits[1])
+	//fmt.Println("appSecret", string(appSecret))
 
 	//  取出 app_id secret
 	//  生成 app_list
