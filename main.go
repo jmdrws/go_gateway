@@ -43,15 +43,13 @@ func main() {
 		lib.InitModule(*config, []string{"base", "mysql", "redis"})
 		defer lib.Destroy()
 		dao.ServiceManagerHandler.LoadOnce()
+		dao.AppManagerHandler.LoadOnce()
 		go func() {
 			http_proxy_router.HttpServerRun()
 		}()
 		go func() {
 			http_proxy_router.HttpsServerRun()
 		}()
-		//fmt.Println("start service")
-		//todo
-
 		quit := make(chan os.Signal)
 		signal.Notify(quit, syscall.SIGKILL, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 		<-quit
