@@ -29,6 +29,8 @@ func HTTPJwtFlowCountMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		//fmt.Println("appCounter.QPS",appCounter.QPS)
+		//fmt.Println("appCounter.TotalCount",appCounter.TotalCount)
 		c.Next()
 	}
 }

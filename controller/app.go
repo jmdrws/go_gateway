@@ -50,8 +50,12 @@ func (admin *APPController) APPList(c *gin.Context) {
 	}
 	var outputList []dto.APPListItemOutput
 	for _, item := range list {
-		realQps := int64(0)
-		realQpd := int64(0)
+		appCounter, err := public.FlowCounterHandler.GetCounter(public.FlowAppPrefix + item.AppID)
+		if err != nil {
+			middleware.ResponseError(c, 2002, err)
+			c.Abort()
+			return
+		}
 		outputList = append(outputList, dto.APPListItemOutput{
 			ID:       item.ID,
 			AppID:    item.AppID,
@@ -60,8 +64,8 @@ func (admin *APPController) APPList(c *gin.Context) {
 			WhiteIPS: item.WhiteIPS,
 			Qpd:      item.Qpd,
 			Qps:      item.Qps,
-			RealQpd:  realQpd,
-			RealQps:  realQps,
+			RealQps:  appCounter.QPS,
+			RealQpd:  appCounter.TotalCount,
 		})
 	}
 	output := dto.APPListOutput{
@@ -236,25 +240,37 @@ func (admin *APPController) AppStatistics(c *gin.Context) {
 		return
 	}
 
-	//search := &dao.App{
-	//	ID: params.ID,
-	//}
-	//detail, err := search.Find(c, lib.GORMDefaultPool, search)
-	//if err != nil {
-	//	middleware.ResponseError(c, 2002, err)
-	//	return
-	//}
+	search := &dao.App{
+		ID: params.ID,
+	}
+	AppDetail, err := search.Find(c, lib.GORMDefaultPool, search)
+	if err != nil {
+		middleware.ResponseError(c, 2002, err)
+		return
+	}
 
 	//今日流量全天小时级访问统计
-	todayStat := []int64{}
+	var todayStat []int64
+	counter, err := public.FlowCounterHandler.GetCounter(public.FlowAppPrefix + AppDetail.AppID)
+	if err != nil {
+		middleware.ResponseError(c, 2003, err)
+		c.Abort()
+		return
+	}
+	currentTime := time.Now()
 	for i := 0; i <= time.Now().In(lib.TimeLocation).Hour(); i++ {
-		todayStat = append(todayStat, 0)
+		dateTime := time.Date(currentTime.Year(), currentTime.Month(), currentTime.Day(), i, 0, 0, 0, lib.TimeLocation)
+		hourData, _ := counter.GetHourData(dateTime)
+		todayStat = append(todayStat, hourData)
 	}
 
 	//昨日流量全天小时级访问统计
-	yesterdayStat := []int64{}
+	var yesterdayStat []int64
+	yesterTime := currentTime.Add(-1 * time.Duration(time.Hour*24))
 	for i := 0; i <= 23; i++ {
-		yesterdayStat = append(yesterdayStat, 0)
+		dateTime := time.Date(yesterTime.Year(), yesterTime.Month(), yesterTime.Day(), i, 0, 0, 0, lib.TimeLocation)
+		hourData, _ := counter.GetHourData(dateTime)
+		yesterdayStat = append(yesterdayStat, hourData)
 	}
 	stat := dto.APPStatisticsOutput{
 		Today:     todayStat,
