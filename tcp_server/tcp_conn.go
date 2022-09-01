@@ -1,4 +1,4 @@
-package tcp_service
+package tcp_server
 
 import (
 	"context"
@@ -28,7 +28,7 @@ func (k *contextKey) String() string {
 }
 
 type conn struct {
-	server     *TCPServer
+	server     *TcpServer
 	cancelCtx  context.CancelFunc
 	rwc        net.Conn
 	remoteAddr string
@@ -53,5 +53,5 @@ func (c conn) serve(ctx context.Context) {
 	if c.server.Handler == nil {
 		panic("handler empty")
 	}
-	c.server.Handler.ServeTCP(ctx,c.rwc)
+	c.server.Handler.ServeTCP(ctx, c.rwc)
 }

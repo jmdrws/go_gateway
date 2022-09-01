@@ -1,4 +1,4 @@
-package tcp_service
+package tcp_server
 
 import (
 	"context"
@@ -37,7 +37,7 @@ type TCPHandler interface {
 	ServeTCP(ctx context.Context, conn net.Conn)
 }
 
-type TCPServer struct {
+type TcpServer struct {
 	Addr    string
 	Handler TCPHandler
 	err     error
@@ -53,11 +53,11 @@ type TCPServer struct {
 	l          *onceCloseListener
 }
 
-func (srv *TCPServer) shuttingDown() bool {
+func (srv *TcpServer) shuttingDown() bool {
 	return atomic.LoadInt32(&srv.inShutdown) != 0
 }
 
-func (srv *TCPServer) ListenAndServe() error {
+func (srv *TcpServer) ListenAndServe() error {
 	if srv.shuttingDown() {
 		return ErrServerClosed
 	}
@@ -75,14 +75,14 @@ func (srv *TCPServer) ListenAndServe() error {
 	return srv.Serve(tcpKeepAliveListener{ln.(*net.TCPListener)})
 }
 
-func (srv *TCPServer) Close() error {
+func (srv *TcpServer) Close() error {
 	atomic.StoreInt32(&srv.inShutdown, 1)
 	close(srv.doneChan) //关闭channel
 	srv.l.Close()       //执行listener关闭
 	return nil
 }
 
-func (srv *TCPServer) getDoneChan() <-chan struct{} {
+func (srv *TcpServer) getDoneChan() <-chan struct{} {
 	srv.mu.Lock()
 	defer srv.mu.Unlock()
 	if srv.doneChan == nil {
@@ -91,7 +91,7 @@ func (srv *TCPServer) getDoneChan() <-chan struct{} {
 	return srv.doneChan
 }
 
-func (srv *TCPServer) newConn(rwc net.Conn) *conn {
+func (srv *TcpServer) newConn(rwc net.Conn) *conn {
 	c := &conn{
 		server: srv,
 		rwc:    rwc,
@@ -112,7 +112,7 @@ func (srv *TCPServer) newConn(rwc net.Conn) *conn {
 	return c
 }
 
-func (srv *TCPServer) Serve(l net.Listener) error {
+func (srv *TcpServer) Serve(l net.Listener) error {
 	srv.l = &onceCloseListener{Listener: l}
 	defer srv.l.Close() //执行listener关闭
 	if srv.BaseCtx == nil {
