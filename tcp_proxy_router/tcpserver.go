@@ -3,7 +3,6 @@ package tcp_proxy_router
 import (
 	"context"
 	"fmt"
-	"github.com/e421083458/golang_common/lib"
 	"github.com/jmdrws/go_gateway/dao"
 	"github.com/jmdrws/go_gateway/reverse_proxy"
 	"github.com/jmdrws/go_gateway/tcp_proxy_middleware"
@@ -25,9 +24,9 @@ func TcpServerRun() {
 	serviceList := dao.ServiceManagerHandler.GetTcpServiceList()
 	for _, serviceItem := range serviceList {
 		tempItem := serviceItem
-		log.Printf("[INFO] tcp_proxy_run %s\n", lib.GetStringConf("proxy.tcp.addr"))
 		go func(serviceDetail *dao.ServiceDetail) {
 			addr := fmt.Sprintf(":%d", serviceDetail.TCPRule.Port)
+			//addr := string(serviceDetail.TCPRule.Port)	不采用
 			rb, err := dao.LoadBalancerHandler.GetLoadBalancer(serviceDetail)
 			if err != nil {
 				log.Fatalf(" [INFO] GetTcpLoadBalancer %v err:%v\n", addr, err)

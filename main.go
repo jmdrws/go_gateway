@@ -6,6 +6,7 @@ import (
 	"github.com/jmdrws/go_gateway/dao"
 	"github.com/jmdrws/go_gateway/http_proxy_router"
 	"github.com/jmdrws/go_gateway/router"
+	"github.com/jmdrws/go_gateway/tcp_proxy_router"
 	"os"
 	"os/signal"
 	"syscall"
@@ -50,9 +51,14 @@ func main() {
 		go func() {
 			http_proxy_router.HttpsServerRun()
 		}()
+		go func() {
+			tcp_proxy_router.TcpServerRun()
+		}()
 		quit := make(chan os.Signal)
 		signal.Notify(quit, syscall.SIGKILL, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 		<-quit
+
+		tcp_proxy_router.TcpServerStop()
 		http_proxy_router.HttpServerStop()
 		http_proxy_router.HttpsServerStop()
 	}
