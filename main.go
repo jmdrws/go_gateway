@@ -4,6 +4,7 @@ import (
 	"flag"
 	"github.com/e421083458/golang_common/lib"
 	"github.com/jmdrws/go_gateway/dao"
+	"github.com/jmdrws/go_gateway/grpc_proxy_router"
 	"github.com/jmdrws/go_gateway/http_proxy_router"
 	"github.com/jmdrws/go_gateway/router"
 	"github.com/jmdrws/go_gateway/tcp_proxy_router"
@@ -54,10 +55,14 @@ func main() {
 		go func() {
 			tcp_proxy_router.TcpServerRun()
 		}()
+		go func() {
+			grpc_proxy_router.GrpcServerRun()
+		}()
 		quit := make(chan os.Signal)
 		signal.Notify(quit, syscall.SIGKILL, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 		<-quit
 
+		grpc_proxy_router.GrpcServerStop()
 		tcp_proxy_router.TcpServerStop()
 		http_proxy_router.HttpServerStop()
 		http_proxy_router.HttpsServerStop()
