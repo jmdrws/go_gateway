@@ -35,7 +35,12 @@ func TcpServerRun() {
 
 			//构建路由及设置中间件
 			router := tcp_proxy_middleware.NewTcpSliceRouter()
-			router.Group("/").Use()
+			router.Group("/").Use(
+				tcp_proxy_middleware.TCPFlowCountMiddleware(),
+				tcp_proxy_middleware.TCPFlowLimitMiddleware(),
+				tcp_proxy_middleware.TCPWhiteListMiddleware(),
+				tcp_proxy_middleware.TCPBlackListMiddleware(),
+			)
 			//构建回调handler
 			routerHandler := tcp_proxy_middleware.NewTcpSliceRouterHandler(
 				func(c *tcp_proxy_middleware.TcpSliceRouterContext) tcp_server.TCPHandler {
