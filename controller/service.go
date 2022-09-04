@@ -109,6 +109,7 @@ func (service *ServiceController) ServiceList(c *gin.Context) {
 			ID:          listItem.ID,
 			ServiceName: listItem.ServiceName,
 			ServiceDesc: listItem.ServiceDesc,
+			LoadType:    listItem.LoadType,
 			ServiceAddr: serviceAddr,
 			Qps:         counter.QPS,
 			Qpd:         counter.TotalCount,
