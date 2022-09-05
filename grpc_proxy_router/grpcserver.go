@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/e421083458/grpc-proxy/proxy"
 	"github.com/jmdrws/go_gateway/dao"
+	"github.com/jmdrws/go_gateway/grpc_proxy_middleware"
 	"github.com/jmdrws/go_gateway/reverse_proxy"
 	"google.golang.org/grpc"
 	"log"
@@ -34,11 +35,13 @@ func GrpcServerRun() {
 			}
 			grpcHandler := reverse_proxy.NewGrpcLoadBalanceHandler(rb)
 			s := grpc.NewServer(
-				grpc.ChainStreamInterceptor(),
+				grpc.ChainStreamInterceptor(
+					grpc_proxy_middleware.GrpcFlowCountMiddleware(serviceDetail),
+				),
 				grpc.CustomCodec(proxy.Codec()),
 				grpc.UnknownServiceHandler(grpcHandler),
 			)
-			grpcServerList := append(grpcServerList, &warpGrpcServer{
+			grpcServerList = append(grpcServerList, &warpGrpcServer{
 				Addr:   addr,
 				Server: s,
 			})
