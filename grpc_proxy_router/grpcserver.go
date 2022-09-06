@@ -37,6 +37,8 @@ func GrpcServerRun() {
 			s := grpc.NewServer(
 				grpc.ChainStreamInterceptor(
 					grpc_proxy_middleware.GrpcFlowCountMiddleware(serviceDetail),
+					grpc_proxy_middleware.GrpcFlowLimitMiddleware(serviceDetail),
+					grpc_proxy_middleware.GrpcJwtAuthTokenMiddleware(serviceDetail),
 				),
 				grpc.CustomCodec(proxy.Codec()),
 				grpc.UnknownServiceHandler(grpcHandler),
