@@ -39,6 +39,8 @@ func GrpcServerRun() {
 					grpc_proxy_middleware.GrpcFlowCountMiddleware(serviceDetail),
 					grpc_proxy_middleware.GrpcFlowLimitMiddleware(serviceDetail),
 					grpc_proxy_middleware.GrpcJwtAuthTokenMiddleware(serviceDetail),
+					grpc_proxy_middleware.GrpcJwtFlowCountMiddleware(serviceDetail),
+					grpc_proxy_middleware.GrpcJwtFlowLimitMiddleware(serviceDetail),
 				),
 				grpc.CustomCodec(proxy.Codec()),
 				grpc.UnknownServiceHandler(grpcHandler),
