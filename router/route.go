@@ -134,5 +134,6 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	{
 		controller.DashboardRegister(dashRouter)
 	}
+	router.Static("/dist", "./dist")
 	return router
 }
