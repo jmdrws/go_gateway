@@ -2,7 +2,6 @@ package grpc_proxy_router
 
 import (
 	"fmt"
-	"github.com/e421083458/grpc-proxy/proxy"
 	"github.com/jmdrws/go_gateway/dao"
 	"github.com/jmdrws/go_gateway/grpc_proxy_middleware"
 	"github.com/jmdrws/go_gateway/reverse_proxy"
@@ -45,7 +44,6 @@ func GrpcServerRun() {
 					grpc_proxy_middleware.GrpcBlackListMiddleware(serviceDetail),
 					grpc_proxy_middleware.GrpcHeaderTransferMiddleware(serviceDetail),
 				),
-				grpc.CustomCodec(proxy.Codec()),
 				grpc.UnknownServiceHandler(grpcHandler),
 			)
 			grpcServerList = append(grpcServerList, &warpGrpcServer{

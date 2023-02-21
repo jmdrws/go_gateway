@@ -10,6 +10,7 @@ const (
 )
 
 func LoadBanlanceFactory(lbType LbType) LoadBalance {
+	//工厂模式
 	switch lbType {
 	case LbRandom:
 		return &RandomBalance{}

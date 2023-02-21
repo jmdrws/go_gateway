@@ -6,7 +6,7 @@ import (
 	"github.com/jmdrws/go_gateway/middleware"
 )
 
-//匹配服务的接入方式  基于请求信息
+// HTTPAccessModeMiddleware 匹配服务的接入方式  基于请求信息
 func HTTPAccessModeMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		service, err := dao.ServiceManagerHandler.HTTPAccessMode(c)
@@ -16,6 +16,7 @@ func HTTPAccessModeMiddleware() gin.HandlerFunc {
 			return
 		}
 		//fmt.Println("matched service:", public.Obj2Json(service))
+		//设置上下文信息，方便之后的服务取得这个服务的信息
 		c.Set("service", service)
 		c.Next()
 	}

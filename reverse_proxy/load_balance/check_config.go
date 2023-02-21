@@ -91,8 +91,9 @@ func (s *LoadBalanceCheckConf) UpdateConf(conf []string) {
 	}
 }
 
+// NewLoadBalanceCheckConf check逻辑：循环检测超过一定次数就会移除这个节点
 func NewLoadBalanceCheckConf(format string, conf map[string]string) (*LoadBalanceCheckConf, error) {
-	aList := []string{}
+	var aList []string
 	//默认初始化
 	for item, _ := range conf {
 		aList = append(aList, item)

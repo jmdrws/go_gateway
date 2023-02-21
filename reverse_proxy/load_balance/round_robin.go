@@ -7,8 +7,10 @@ import (
 )
 
 type RoundRobinBalance struct {
+	//索引值
 	curIndex int
-	rss      []string
+	//包含IP地址的数组
+	rss []string
 	//观察主体
 	conf LoadBalanceConf
 }

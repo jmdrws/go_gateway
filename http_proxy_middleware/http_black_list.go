@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-//匹配接入方式 基于请求信息
+// HTTPBlackListMiddleware 匹配接入方式 基于请求信息
 func HTTPBlackListMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		serverInterface, ok := c.Get("service")

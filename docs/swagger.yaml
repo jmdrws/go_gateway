@@ -279,6 +279,37 @@ definitions:
     required:
     - password
     type: object
+  dto.DashServiceStatItemOutput:
+    properties:
+      load_type:
+        type: integer
+      name:
+        type: string
+      value:
+        type: integer
+    type: object
+  dto.DashServiceStatOutput:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/dto.DashServiceStatItemOutput'
+        type: array
+      legend:
+        items:
+          type: string
+        type: array
+    type: object
+  dto.PanelGroupDataOutput:
+    properties:
+      appNum:
+        type: integer
+      currentQps:
+        type: integer
+      serviceNum:
+        type: integer
+      todayRequestNum:
+        type: integer
+    type: object
   dto.ServiceAddGRPCInput:
     properties:
       black_list:
@@ -672,6 +703,35 @@ definitions:
     - service_name
     - weight_list
     type: object
+  dto.TokensInput:
+    properties:
+      grant_type:
+        description: 授权类型
+        example: client_credentials
+        type: string
+      scope:
+        description: 权限范围
+        example: read_write
+        type: string
+    required:
+    - grant_type
+    - scope
+    type: object
+  dto.TokensOutput:
+    properties:
+      access_token:
+        description: access_token
+        type: string
+      expires_in:
+        description: expires_in
+        type: integer
+      scope:
+        description: scope
+        type: string
+      token_type:
+        description: token_type
+        type: string
+    type: object
   middleware.Response:
     properties:
       data: {}
@@ -956,6 +1016,97 @@ paths:
       summary: 租户更新
       tags:
       - 租户管理
+  /dashboard/flow_stat:
+    get:
+      consumes:
+      - application/json
+      description: 服务统计
+      operationId: /dashboard/flow_stat
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.ServiceStatOutput'
+              type: object
+      summary: 流量统计
+      tags:
+      - 首页大盘
+  /dashboard/panel_group_data:
+    get:
+      consumes:
+      - application/json
+      description: 指标统计
+      operationId: /dashboard/panel_group_data
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.PanelGroupDataOutput'
+              type: object
+      summary: 指标统计
+      tags:
+      - 首页大盘
+  /dashboard/service_stat:
+    get:
+      consumes:
+      - application/json
+      description: 服务统计
+      operationId: /dashboard/service_stat
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.DashServiceStatOutput'
+              type: object
+      summary: 服务统计
+      tags:
+      - 首页大盘
+  /oauth/tokens:
+    post:
+      consumes:
+      - application/json
+      description: 获取TOKEN
+      operationId: /oauth/tokens
+      parameters:
+      - description: body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.TokensInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: success
+          schema:
+            allOf:
+            - $ref: '#/definitions/middleware.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.TokensOutput'
+              type: object
+      summary: 获取TOKEN
+      tags:
+      - OAUTH
   /service/service_add_grpc:
     post:
       consumes:

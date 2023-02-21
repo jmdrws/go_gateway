@@ -21,6 +21,7 @@ var (
 )
 
 func main() {
+	//解析参数
 	flag.Parse()
 	if *endpoint == "" {
 		flag.Usage()
@@ -58,6 +59,7 @@ func main() {
 		go func() {
 			grpc_proxy_router.GrpcServerRun()
 		}()
+		//quit持续监听信号（syscall.SIGKILL, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM）
 		quit := make(chan os.Signal)
 		signal.Notify(quit, syscall.SIGKILL, syscall.SIGQUIT, syscall.SIGINT, syscall.SIGTERM)
 		<-quit

@@ -55,6 +55,10 @@ func (t *LoadBalance) GetWeightListByModel() []string {
 	return strings.Split(t.WeightList, ",")
 }
 
+//为什么要既创建map又要创建slice？
+//因为如果服务比较多的情况下，直接根据key使用map去取得；
+//而如果服务比较少的情况，则使用slice的遍历可以减少锁的开销。
+
 type LoadBalancer struct {
 	LoadBalanceMap   map[string]*LoadBalancerItem
 	LoadBalanceSlice []*LoadBalancerItem
@@ -80,6 +84,7 @@ func init() {
 	LoadBalancerHandler = NewLoadBalancer()
 }
 
+// GetLoadBalancer 获取负载均衡的策略
 func (lbr *LoadBalancer) GetLoadBalancer(service *ServiceDetail) (load_balance.LoadBalance, error) {
 	for _, lbrItem := range lbr.LoadBalanceSlice {
 		if lbrItem.serviceName == service.Info.ServiceName {
@@ -93,16 +98,21 @@ func (lbr *LoadBalancer) GetLoadBalancer(service *ServiceDetail) (load_balance.L
 	if service.Info.LoadType == public.LoadTypeTCP || service.Info.LoadType == public.LoadTypeGRPC {
 		schema = ""
 	}
+
+	//获取并设置IP列表和对应权重
 	ipList := service.LoadBalance.GetIPListByModel()
 	weightList := service.LoadBalance.GetWeightListByModel()
 	ipConf := map[string]string{}
 	for ipIndex, ipItem := range ipList {
 		ipConf[ipItem] = weightList[ipIndex]
 	}
+
+	//创建负载均衡的配置	意义：需要主动去探活下游的节点，它这里面有check逻辑，循环检测超过一定次数就会移除这个节点
 	mConf, err := load_balance.NewLoadBalanceCheckConf(fmt.Sprintf("%s%s", schema, "%s"), ipConf)
 	if err != nil {
 		return nil, err
 	}
+	//有了负载均衡的配置后就可以去创建负载均衡的策略
 	lb := load_balance.LoadBanlanceFactorWithConf(load_balance.LbType(service.LoadBalance.RoundType), mConf)
 
 	//save to map and slice
@@ -115,6 +125,7 @@ func (lbr *LoadBalancer) GetLoadBalancer(service *ServiceDetail) (load_balance.L
 	lbr.Locker.Lock()
 	defer lbr.Locker.Unlock()
 	lbr.LoadBalanceMap[service.Info.ServiceName] = lbItem
+
 	return lb, nil
 
 }
@@ -144,6 +155,7 @@ func init() {
 	TransporterHandler = NewTransportor()
 }
 
+// GetTrans 获取连接池配置
 func (t *Transporter) GetTrans(service *ServiceDetail) (*http.Transport, error) {
 	for _, transItem := range t.TransportSlice {
 		if transItem.ServiceName == service.Info.ServiceName {
@@ -151,7 +163,6 @@ func (t *Transporter) GetTrans(service *ServiceDetail) (*http.Transport, error) 
 		}
 	}
 
-	//todo 优化点5
 	if service.LoadBalance.UpstreamConnectTimeout == 0 {
 		service.LoadBalance.UpstreamConnectTimeout = 30
 	}

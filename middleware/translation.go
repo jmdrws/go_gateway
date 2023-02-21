@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-//设置Translation
+// TranslationMiddleware 设置Translation
 func TranslationMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		//参照：https://github.com/go-playground/validator/blob/v9/_examples/translations/main.go
@@ -46,7 +46,9 @@ func TranslationMiddleware() gin.HandlerFunc {
 				return fld.Tag.Get("comment")
 			})
 
-			//自定义验证方法
+			//主要注意点，在结构体字段后面添加，校验dto中的input输入
+
+			//自定义验证方法,通过正则表达式判断输入是否合法
 			//https://github.com/go-playground/validator/blob/v9/_examples/custom-validation/main.go
 			val.RegisterValidation("is_valid_username", func(fl validator.FieldLevel) bool {
 				return fl.Field().String() == "admin"

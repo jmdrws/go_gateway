@@ -10,12 +10,13 @@ import (
 	"strings"
 )
 
+// NewLoadBalanceReverseProxy 创建反向代理的方法
 func NewLoadBalanceReverseProxy(c *gin.Context, lb load_balance.LoadBalance, trans *http.Transport) *httputil.ReverseProxy {
-	//请求协调者
+	//修改控制器内容，说白了就是拼接
 	director := func(req *http.Request) {
-		nextAddr, err := lb.Get(req.URL.String())
 
-		//todo 优化点3
+		//取得负载均衡的值nextAddr
+		nextAddr, err := lb.Get(req.URL.String())
 		//fmt.Println("nextAddr ", nextAddr)
 		if err != nil || nextAddr == "" {
 			panic("get next addr fail")
@@ -24,9 +25,14 @@ func NewLoadBalanceReverseProxy(c *gin.Context, lb load_balance.LoadBalance, tra
 		if err != nil {
 			panic(err)
 		}
+		//http://127.0.0.1:2002/dir?name=123
+		//targetQuery: name=123
+		//Scheme: http
+		//Host: 127.0.0.1:2002
 		targetQuery := target.RawQuery
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
+		//singleJoiningSlash("/base","/dir")
 		req.URL.Path = singleJoiningSlash(target.Path, req.URL.Path)
 		req.Host = target.Host
 		if targetQuery == "" || req.URL.RawQuery == "" {
@@ -44,8 +50,6 @@ func NewLoadBalanceReverseProxy(c *gin.Context, lb load_balance.LoadBalance, tra
 		if strings.Contains(resp.Header.Get("Connection"), "Upgrade") {
 			return nil
 		}
-
-		//todo 优化点2
 		//暂时没有当前的使用场景
 		//var payload []byte
 		//var readErr error

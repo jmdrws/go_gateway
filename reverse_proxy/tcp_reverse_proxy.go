@@ -16,6 +16,7 @@ func NewTcpLoadBalanceReverseProxy(c *tcp_proxy_middleware.TcpSliceRouterContext
 		if err != nil {
 			log.Fatal("get next addr fail")
 		}
+		//设置上TCP反向代理结构体
 		return &TcpReverseProxy{
 			ctx:             c.Ctx,
 			Addr:            nextAddr,
@@ -25,7 +26,7 @@ func NewTcpLoadBalanceReverseProxy(c *tcp_proxy_middleware.TcpSliceRouterContext
 	}()
 }
 
-//TCP反向代理
+// TcpReverseProxy TCP反向代理
 type TcpReverseProxy struct {
 	ctx                  context.Context //单次请求单独设置
 	Addr                 string
@@ -62,13 +63,14 @@ func (dp *TcpReverseProxy) keepAlivePeriod() time.Duration {
 	return time.Minute
 }
 
-//传入上游 conn，在这里完成下游连接与数据交换
+// ServeTCP 传入上游 conn，在这里完成下游连接与数据交换
 func (dp *TcpReverseProxy) ServeTCP(ctx context.Context, src net.Conn) {
 	//设置连接超时
 	var cancel context.CancelFunc
 	if dp.DialTimeout >= 0 {
 		ctx, cancel = context.WithTimeout(ctx, dp.dialTimeout())
 	}
+	//开启与下游的连接
 	dst, err := dp.dialContext()(ctx, "tcp", dp.Addr)
 	if cancel != nil {
 		cancel()
@@ -77,7 +79,6 @@ func (dp *TcpReverseProxy) ServeTCP(ctx context.Context, src net.Conn) {
 		dp.onDialError()(src, err)
 		return
 	}
-
 	defer func() { go dst.Close() }() //记得退出下游连接
 
 	//设置dst的 keepAlive 参数,在数据请求之前
@@ -88,6 +89,7 @@ func (dp *TcpReverseProxy) ServeTCP(ctx context.Context, src net.Conn) {
 		}
 	}
 	errc := make(chan error, 1)
+	//上游下游数据交换
 	go dp.proxyCopy(errc, src, dst)
 	go dp.proxyCopy(errc, dst, src)
 	<-errc

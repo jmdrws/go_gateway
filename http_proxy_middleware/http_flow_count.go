@@ -6,7 +6,6 @@ import (
 	"github.com/jmdrws/go_gateway/middleware"
 	"github.com/jmdrws/go_gateway/public"
 	"github.com/pkg/errors"
-	"time"
 )
 
 func HTTPFlowCountMiddleware() gin.HandlerFunc {
@@ -17,9 +16,11 @@ func HTTPFlowCountMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		//从上下文中获取后转换
 		serviceDetail := serverInterface.(*dao.ServiceDetail)
 
-		//统计项 1 全站 2 服务 3 租户
+		//统计项 1 全站 2 服务
+		//1、全站
 		totalCounter, err := public.FlowCounterHandler.GetCounter(public.FlowTotal)
 		if err != nil {
 			middleware.ResponseError(c, 4001, err)
@@ -27,9 +28,9 @@ func HTTPFlowCountMiddleware() gin.HandlerFunc {
 			return
 		}
 		totalCounter.Increase()
-
-		_, _ = totalCounter.GetDayData(time.Now())
+		//_, _ = totalCounter.GetDayData(time.Now())
 		//fmt.Printf("totalCounter qps:%v,dayCount:%v\n", totalCounter.QPS, dayCount)
+		//2、服务
 		serviceCounter, err := public.FlowCounterHandler.GetCounter(public.FlowServicePrefix + serviceDetail.Info.ServiceName)
 		if err != nil {
 			middleware.ResponseError(c, 4001, err)
@@ -37,8 +38,7 @@ func HTTPFlowCountMiddleware() gin.HandlerFunc {
 			return
 		}
 		serviceCounter.Increase()
-
-		_, _ = serviceCounter.GetDayData(time.Now())
+		//_, _ = serviceCounter.GetDayData(time.Now())
 		//fmt.Printf("serviceCounter qps:%v,dayCount:%v", serviceCounter.QPS, dayServiceCount)
 		c.Next()
 	}

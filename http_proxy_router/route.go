@@ -8,6 +8,7 @@ import (
 )
 
 func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
+	//可使用gin.New()方法创建框架的实例，它包含了复用器、中间件和配置设置，
 	router := gin.New()
 	router.Use(middlewares...)
 	router.GET("/ping", func(c *gin.Context) {
@@ -15,6 +16,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 			"message": "pong",
 		})
 	})
+	//Group 创建一个新的路由器组。添加所有具有通用中间件或相同路径前缀的路由。
 	oauth := router.Group("/oauth")
 	oauth.Use(middleware.TranslationMiddleware())
 	{
@@ -39,6 +41,5 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 
 		http_proxy_middleware.HTTPReverseProxyMiddleware(),
 	)
-
 	return router
 }

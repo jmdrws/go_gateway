@@ -40,6 +40,7 @@ func (c *conn) close() {
 
 func (c conn) serve(ctx context.Context) {
 	defer func() {
+		//recover拦截错误信息并打印
 		if err := recover(); err != nil && err != ErrAbortHandler {
 			const size = 64 << 10
 			buf := make([]byte, size)
@@ -48,10 +49,12 @@ func (c conn) serve(ctx context.Context) {
 		}
 		c.close()
 	}()
+	//获取连接地址、上下文、handler
 	c.remoteAddr = c.rwc.RemoteAddr().String()
 	ctx = context.WithValue(ctx, LocalAddrContextKey, c.rwc.LocalAddr())
 	if c.server.Handler == nil {
 		panic("handler empty")
 	}
+	//调用tcp_server.go中的ServeTCP
 	c.server.Handler.ServeTCP(ctx, c.rwc)
 }

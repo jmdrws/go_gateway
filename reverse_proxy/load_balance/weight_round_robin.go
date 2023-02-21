@@ -8,9 +8,11 @@ import (
 )
 
 type WeightRoundRobinBalance struct {
+	//索引值
 	curIndex int
-	rss      []*WeightNode
-	rsw      []int
+	//节点数组
+	rss []*WeightNode
+	rsw []int
 	//观察主体
 	conf LoadBalanceConf
 }

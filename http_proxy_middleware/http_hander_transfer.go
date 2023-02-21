@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-//Head头转换
+//Header头转换
 func HTTPHeaderTransferMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		serverInterface, ok := c.Get("service")
@@ -18,6 +18,7 @@ func HTTPHeaderTransferMiddleware() gin.HandlerFunc {
 			return
 		}
 		serverDetail := serverInterface.(*dao.ServiceDetail)
+		//header转换支持增加(add)、删除(del)、修改(edit) 格式: add headname headvalue
 		for _, item := range strings.Split(serverDetail.HTTPRule.HeaderTransfor, ",") {
 			items := strings.Split(item, " ")
 			if len(items) != 3 {
@@ -30,7 +31,6 @@ func HTTPHeaderTransferMiddleware() gin.HandlerFunc {
 				c.Request.Header.Del(items[1])
 			}
 		}
-
 		c.Next()
 	}
 }

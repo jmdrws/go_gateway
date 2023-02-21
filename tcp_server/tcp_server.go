@@ -23,7 +23,6 @@ type onceCloseListener struct {
 	closeErr error
 }
 
-//为什么两个close要分开写，再相互调用
 func (oc *onceCloseListener) Close() error {
 	oc.once.Do(oc.close)
 	return oc.closeErr
@@ -38,26 +37,27 @@ type TCPHandler interface {
 }
 
 type TcpServer struct {
-	Addr    string
-	Handler TCPHandler
+	Addr    string     //监听地址
+	Handler TCPHandler //实际逻辑回调设置handler
 	err     error
-	BaseCtx context.Context
-
+	BaseCtx context.Context //上下文
+	//读写超时设置
 	WriteTimeout     time.Duration
 	ReadTimeout      time.Duration
-	KeepAliveTimeout time.Duration
-
-	mu         sync.Mutex
-	inShutdown int32
-	doneChan   chan struct{}
-	l          *onceCloseListener
+	KeepAliveTimeout time.Duration //连接一直保持 发数据包的时间
+	mu               sync.Mutex    //锁
+	inShutdown       int32         //是否关闭
+	doneChan         chan struct{}
+	l                *onceCloseListener //单次启动时，listen需要执行的一次性操作的设置
 }
 
 func (srv *TcpServer) shuttingDown() bool {
+	//原子方法验证是否为0
 	return atomic.LoadInt32(&srv.inShutdown) != 0
 }
 
 func (srv *TcpServer) ListenAndServe() error {
+	//验证服务是否关闭
 	if srv.shuttingDown() {
 		return ErrServerClosed
 	}
@@ -68,6 +68,7 @@ func (srv *TcpServer) ListenAndServe() error {
 	if addr == "" {
 		return errors.New("need addr")
 	}
+	//调用核心的官方方法，并传入到Serve中
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
@@ -96,7 +97,7 @@ func (srv *TcpServer) newConn(rwc net.Conn) *conn {
 		server: srv,
 		rwc:    rwc,
 	}
-	// 设置参数	为什么要单独设置一个d来判断它是否为0呢？？？
+	// 设置超时时间参数返回
 	if d := c.server.ReadTimeout; d != 0 {
 		c.rwc.SetReadDeadline(time.Now().Add(d))
 	}
@@ -114,12 +115,14 @@ func (srv *TcpServer) newConn(rwc net.Conn) *conn {
 
 func (srv *TcpServer) Serve(l net.Listener) error {
 	srv.l = &onceCloseListener{Listener: l}
-	defer srv.l.Close() //执行listener关闭
+	//退出时执行listener关闭
+	defer srv.l.Close()
 	if srv.BaseCtx == nil {
 		srv.BaseCtx = context.Background()
 	}
 	BaseCtx := srv.BaseCtx
 	ctx := context.WithValue(BaseCtx, ServiceContextKey, srv)
+	//轮询Listener的Accept方法，获取客户端发来的conn
 	for {
 		rw, err := l.Accept()
 		if err != nil {
@@ -131,6 +134,7 @@ func (srv *TcpServer) Serve(l net.Listener) error {
 			fmt.Printf("accept fail, err: %v\n", err)
 			continue
 		}
+		//拿到便马上创建连接
 		c := srv.newConn(rw)
 		go c.serve(ctx)
 	}

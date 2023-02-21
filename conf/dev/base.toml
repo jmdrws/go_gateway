@@ -1,7 +1,7 @@
 # This is base config
 
 [base]
-    debug_mode="release"
+    debug_mode="debug"
     time_location="Asia/Chongqing"
 
 [http]
@@ -28,7 +28,7 @@
 
 [cluster]
     cluster_ip="127.0.0.1"
-    cluster_port="8080"
+    cluster_port="8880"
     cluster_ssl_port="4433"
 
 [swagger]

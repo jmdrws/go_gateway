@@ -75,7 +75,7 @@ func (service *ServiceController) ServiceList(c *gin.Context) {
 		//1、http后缀接入 clusterIP+clusterPort+path
 		//2、http域名接入 domain
 		//3、tcp、grpc接入 clusterIP+servicePort
-		serviceAddr := "unknow"
+		serviceAddr := "unknown"
 		clusterIP := lib.GetStringConf("base.cluster.cluster_ip")
 		clusterPort := lib.GetStringConf("base.cluster.cluster_port")
 		clusterSSLPort := lib.GetStringConf("base.cluster.cluster_ssl_port")
@@ -163,7 +163,7 @@ func (service *ServiceController) ServiceDelete(c *gin.Context) {
 	middleware.ResponseSuccess(c, "")
 }
 
-// ServiceAddHttp godoc
+// ServiceAddHTTP godoc
 // @Summary 添加HTTP服务
 // @Description 添加HTTP服务
 // @Tags 服务管理

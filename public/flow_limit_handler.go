@@ -36,6 +36,7 @@ func (counter *FlowLimiter) GetLimiter(serviceName string, qps float64) (*rate.L
 		}
 	}
 
+	//创建限流器（每秒令牌数，桶中最大令牌数）
 	newLimiter := rate.NewLimiter(rate.Limit(qps), int(qps*3))
 	item := &FlowLimiterItem{
 		ServiceName: serviceName,
