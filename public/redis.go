@@ -1,8 +1,8 @@
 package public
 
 import (
-	"github.com/e421083458/golang_common/lib"
 	"github.com/gomodule/redigo/redis"
+	"github.com/jmdrws/go_gateway/golang_common/lib"
 )
 
 // RedisConfPipline redis连接的设置方法，例如在流量统计中间件中设置数据和超时时间
@@ -13,6 +13,7 @@ func RedisConfPipline(pip ...func(c redis.Conn)) error {
 		return err
 	}
 	defer c.Close()
+
 	for _, f := range pip {
 		f(c)
 	}
@@ -27,5 +28,6 @@ func RedisConfDo(commandName string, args ...interface{}) (interface{}, error) {
 		return nil, err
 	}
 	defer c.Close()
+
 	return c.Do(commandName, args...)
 }

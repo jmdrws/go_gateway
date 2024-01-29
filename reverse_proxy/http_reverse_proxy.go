@@ -50,7 +50,7 @@ func NewLoadBalanceReverseProxy(c *gin.Context, lb load_balance.LoadBalance, tra
 		if strings.Contains(resp.Header.Get("Connection"), "Upgrade") {
 			return nil
 		}
-		//暂时没有当前的使用场景
+		//
 		//var payload []byte
 		//var readErr error
 		//

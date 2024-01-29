@@ -2,10 +2,10 @@ package dao
 
 import (
 	"fmt"
+	"github.com/e421083458/gorm"
 	"github.com/gin-gonic/gin"
 	"github.com/jmdrws/go_gateway/public"
 	"github.com/jmdrws/go_gateway/reverse_proxy/load_balance"
-	"gorm.io/gorm"
 	"net"
 	"net/http"
 	"strings"
@@ -36,12 +36,12 @@ func (t *LoadBalance) TableName() string {
 
 func (t *LoadBalance) Find(c *gin.Context, tx *gorm.DB, search *LoadBalance) (*LoadBalance, error) {
 	model := &LoadBalance{}
-	err := tx.WithContext(c).Where("service_id = ?", search.ServiceID).First(model).Error
+	err := tx.SetCtx(public.GetGinTraceContext(c)).Where("service_id = ?", search.ServiceID).First(model).Error
 	return model, err
 }
 
 func (t *LoadBalance) Save(c *gin.Context, tx *gorm.DB) error {
-	if err := tx.WithContext(c).Save(t).Error; err != nil {
+	if err := tx.SetCtx(public.GetGinTraceContext(c)).Save(t).Error; err != nil {
 		return err
 	}
 	return nil

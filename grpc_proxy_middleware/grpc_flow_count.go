@@ -19,11 +19,11 @@ func GrpcFlowCountMiddleware(serviceDetail *dao.ServiceDetail) func(srv interfac
 			return err
 		}
 		serviceCounter.Increase()
+
 		if err := handler(srv, ss); err != nil {
 			log.Printf("GrpcFlowCountMiddleware failed with error %v\n", err)
 			return err
 		}
 		return nil
 	}
-
 }

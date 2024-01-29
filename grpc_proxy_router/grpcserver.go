@@ -2,6 +2,7 @@ package grpc_proxy_router
 
 import (
 	"fmt"
+	"github.com/e421083458/grpc-proxy/proxy"
 	"github.com/jmdrws/go_gateway/dao"
 	"github.com/jmdrws/go_gateway/grpc_proxy_middleware"
 	"github.com/jmdrws/go_gateway/reverse_proxy"
@@ -10,7 +11,7 @@ import (
 	"net"
 )
 
-var grpcServerList []*warpGrpcServer
+var grpcServerList = []*warpGrpcServer{}
 
 type warpGrpcServer struct {
 	Addr string
@@ -44,8 +45,9 @@ func GrpcServerRun() {
 					grpc_proxy_middleware.GrpcBlackListMiddleware(serviceDetail),
 					grpc_proxy_middleware.GrpcHeaderTransferMiddleware(serviceDetail),
 				),
-				grpc.UnknownServiceHandler(grpcHandler),
-			)
+				grpc.CustomCodec(proxy.Codec()),
+				grpc.UnknownServiceHandler(grpcHandler))
+
 			grpcServerList = append(grpcServerList, &warpGrpcServer{
 				Addr:   addr,
 				Server: s,

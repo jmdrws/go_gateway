@@ -2,8 +2,8 @@ package public
 
 import (
 	"fmt"
-	"github.com/e421083458/golang_common/lib"
 	"github.com/gomodule/redigo/redis"
+	"github.com/jmdrws/go_gateway/golang_common/lib"
 	"sync/atomic"
 	"time"
 )
@@ -43,15 +43,16 @@ func NewRedisFlowCountService(appID string, interval time.Duration) *RedisFlowCo
 			currentTime := time.Now()
 			dayKey := reqCounter.GetDayKey(currentTime)
 			hourKey := reqCounter.GetHourKey(currentTime)
-			if err := RedisConfPipline(func(c redis.Conn) {
-				//数据的增加
-				c.Send("INCRBY", dayKey, tickerCount)
-				//超时时间设置
-				c.Send("EXPIRE", dayKey, 86400*2)
+			if err := RedisConfPipline(
+				func(c redis.Conn) {
+					//数据的增加
+					c.Send("INCRBY", dayKey, tickerCount)
+					//超时时间设置
+					c.Send("EXPIRE", dayKey, 86400*2)
 
-				c.Send("INCRBY", hourKey, tickerCount)
-				c.Send("EXPIRE", hourKey, 86400*2)
-			}); err != nil {
+					c.Send("INCRBY", hourKey, tickerCount)
+					c.Send("EXPIRE", hourKey, 86400*2)
+				}); err != nil {
 				fmt.Println("RedisConfPipline err", err)
 				continue
 			}
@@ -71,6 +72,7 @@ func NewRedisFlowCountService(appID string, interval time.Duration) *RedisFlowCo
 				reqCounter.TotalCount = totalCount
 				reqCounter.QPS = tickerCount / (nowUnix - reqCounter.Unix)
 				reqCounter.Unix = time.Now().Unix()
+				//reqCounter.Unix = nowUnix
 			}
 		}
 	}()

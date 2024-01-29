@@ -45,7 +45,6 @@ func (s *LoadBalanceCheckConf) GetConf() []string {
 	return confList
 }
 
-//更新配置时，通知监听者也更新
 func (s *LoadBalanceCheckConf) WatchConf() {
 	//fmt.Println("watchConf")
 	go func() {
@@ -53,21 +52,25 @@ func (s *LoadBalanceCheckConf) WatchConf() {
 		for {
 			changedList := []string{}
 			for item, _ := range s.confIpWeight {
+				//创建连接，设置超时时间
 				conn, err := net.DialTimeout("tcp", item, time.Duration(DefaultCheckTimeout)*time.Second)
-				//todo http statuscode
 				if err == nil {
+					//关闭连接，map中对应节点的err次数为空
 					conn.Close()
 					if _, ok := confIpErrNum[item]; ok {
 						confIpErrNum[item] = 0
 					}
 				}
 				if err != nil {
+					//map中对应节点的err次数加一
 					if _, ok := confIpErrNum[item]; ok {
 						confIpErrNum[item] += 1
 					} else {
 						confIpErrNum[item] = 1
 					}
 				}
+				//若err次数小于设置的最大失败数，就添加节点
+				//否则表示节点挂了，不添加进节点切片中
 				if confIpErrNum[item] < DefaultCheckMaxErrNum {
 					changedList = append(changedList, item)
 				}
@@ -82,7 +85,6 @@ func (s *LoadBalanceCheckConf) WatchConf() {
 	}()
 }
 
-//更新配置时，通知监听者也更新
 func (s *LoadBalanceCheckConf) UpdateConf(conf []string) {
 	//fmt.Println("UpdateConf", conf)
 	s.activeList = conf
@@ -99,6 +101,7 @@ func NewLoadBalanceCheckConf(format string, conf map[string]string) (*LoadBalanc
 		aList = append(aList, item)
 	}
 	mConf := &LoadBalanceCheckConf{format: format, activeList: aList, confIpWeight: conf}
+	//探活检测
 	mConf.WatchConf()
 	return mConf, nil
 }

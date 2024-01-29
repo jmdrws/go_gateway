@@ -2,7 +2,6 @@ package load_balance
 
 import (
 	"errors"
-	"fmt"
 	"hash/crc32"
 	"sort"
 	"strconv"
@@ -63,7 +62,7 @@ func (c *ConsistentHashBanlance) Add(params ...string) error {
 	addr := params[0]
 	c.mux.Lock()
 	defer c.mux.Unlock()
-	// 结合复制因子计算所有虚拟节点的hash值，并存入m.keys中，同时在m.hashMap中保存哈希值和key的映射
+	// 结合复制因子计算所有虚拟节点的hash值，并存入c.keys中，同时在c.hashMap中保存哈希值和key的映射
 	for i := 0; i < c.replicas; i++ {
 		hash := c.hash([]byte(strconv.Itoa(i) + addr))
 		c.keys = append(c.keys, hash)
@@ -99,10 +98,10 @@ func (c *ConsistentHashBanlance) SetConf(conf LoadBalanceConf) {
 
 func (c *ConsistentHashBanlance) Update() {
 	if conf, ok := c.conf.(*LoadBalanceCheckConf); ok {
-		fmt.Println("Update get check conf:", conf.GetConf())
+		//fmt.Println("Update get check conf:", conf.GetConf())
 		c.keys = nil
 		c.hashMap = map[uint32]string{}
-		fmt.Println("conf.GetConf()", conf.GetConf())
+		//fmt.Println("conf.GetConf()", conf.GetConf())
 		for _, ip := range conf.GetConf() {
 			c.Add(strings.Split(ip, ",")...)
 		}

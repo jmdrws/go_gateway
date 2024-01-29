@@ -117,6 +117,7 @@ func (srv *TcpServer) Serve(l net.Listener) error {
 	srv.l = &onceCloseListener{Listener: l}
 	//退出时执行listener关闭
 	defer srv.l.Close()
+
 	if srv.BaseCtx == nil {
 		srv.BaseCtx = context.Background()
 	}

@@ -14,7 +14,7 @@ import (
 //匹配接入方式 基于请求信息
 func GrpcBlackListMiddleware(serviceDetail *dao.ServiceDetail) func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-		var whileIpList []string
+		whileIpList := []string{}
 		if serviceDetail.AccessControl.WhiteList != "" {
 			whileIpList = strings.Split(serviceDetail.AccessControl.WhiteList, ",")
 		}
@@ -25,7 +25,7 @@ func GrpcBlackListMiddleware(serviceDetail *dao.ServiceDetail) func(srv interfac
 		peerAddr := peerCtx.Addr.String()
 		addrPos := strings.LastIndex(peerAddr, ":")
 		clientIP := peerAddr[0:addrPos]
-		var blackIpList []string
+		blackIpList := []string{}
 		if serviceDetail.AccessControl.BlackList != "" {
 			blackIpList = strings.Split(serviceDetail.AccessControl.BlackList, ",")
 		}

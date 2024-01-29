@@ -1,10 +1,10 @@
 package grpc_proxy_middleware
 
 import (
-	"errors"
 	"fmt"
 	"github.com/jmdrws/go_gateway/dao"
 	"github.com/jmdrws/go_gateway/public"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/peer"
 	"log"
@@ -16,8 +16,7 @@ func GrpcFlowLimitMiddleware(serviceDetail *dao.ServiceDetail) func(srv interfac
 		if serviceDetail.AccessControl.ServiceFlowLimit != 0 {
 			serviceLimiter, err := public.FlowLimiterHandler.GetLimiter(
 				public.FlowServicePrefix+serviceDetail.Info.ServiceName,
-				float64(serviceDetail.AccessControl.ServiceFlowLimit),
-			)
+				float64(serviceDetail.AccessControl.ServiceFlowLimit))
 			if err != nil {
 				return err
 			}
@@ -35,8 +34,7 @@ func GrpcFlowLimitMiddleware(serviceDetail *dao.ServiceDetail) func(srv interfac
 		if serviceDetail.AccessControl.ClientIPFlowLimit > 0 {
 			clientLimiter, err := public.FlowLimiterHandler.GetLimiter(
 				public.FlowServicePrefix+serviceDetail.Info.ServiceName+"_"+clientIP,
-				float64(serviceDetail.AccessControl.ClientIPFlowLimit),
-			)
+				float64(serviceDetail.AccessControl.ClientIPFlowLimit))
 			if err != nil {
 				return err
 			}
@@ -50,5 +48,4 @@ func GrpcFlowLimitMiddleware(serviceDetail *dao.ServiceDetail) func(srv interfac
 		}
 		return nil
 	}
-
 }

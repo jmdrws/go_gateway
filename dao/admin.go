@@ -1,11 +1,11 @@
 package dao
 
 import (
+	"github.com/e421083458/gorm"
 	"github.com/gin-gonic/gin"
 	"github.com/jmdrws/go_gateway/dto"
 	"github.com/jmdrws/go_gateway/public"
 	"github.com/pkg/errors"
-	"gorm.io/gorm"
 	"time"
 )
 
@@ -41,7 +41,7 @@ func (t *Admin) LoginCheck(c *gin.Context, tx *gorm.DB, param *dto.AdminLoginInp
 
 func (t *Admin) Find(c *gin.Context, tx *gorm.DB, search *Admin) (*Admin, error) {
 	out := &Admin{}
-	err := tx.WithContext(c).Where("user_name = ?", search.UserName).First(out).Error
+	err := tx.SetCtx(public.GetGinTraceContext(c)).Where("user_name = ?", search.UserName).First(out).Error
 	if err != nil {
 		return nil, err
 	}
@@ -49,5 +49,5 @@ func (t *Admin) Find(c *gin.Context, tx *gorm.DB, search *Admin) (*Admin, error)
 }
 
 func (t *Admin) Save(c *gin.Context, tx *gorm.DB) error {
-	return tx.WithContext(c).Save(t).Error
+	return tx.SetCtx(public.GetGinTraceContext(c)).Save(t).Error
 }

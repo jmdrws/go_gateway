@@ -2,10 +2,10 @@ package grpc_proxy_middleware
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/jmdrws/go_gateway/dao"
 	"github.com/jmdrws/go_gateway/public"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"log"

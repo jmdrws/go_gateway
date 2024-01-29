@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"github.com/e421083458/golang_common/lib"
 	"github.com/jmdrws/go_gateway/dao"
+	"github.com/jmdrws/go_gateway/golang_common/lib"
 	"github.com/jmdrws/go_gateway/grpc_proxy_router"
 	"github.com/jmdrws/go_gateway/http_proxy_router"
 	"github.com/jmdrws/go_gateway/router"
@@ -33,7 +33,7 @@ func main() {
 	}
 
 	if *endpoint == "dashboard" {
-		lib.InitModule(*config, []string{"base", "mysql", "redis"})
+		lib.InitModule(*config)
 		defer lib.Destroy()
 		router.HttpServerRun()
 
@@ -43,7 +43,7 @@ func main() {
 
 		router.HttpServerStop()
 	} else {
-		lib.InitModule(*config, []string{"base", "mysql", "redis"})
+		lib.InitModule(*config)
 		defer lib.Destroy()
 		dao.ServiceManagerHandler.LoadOnce()
 		dao.AppManagerHandler.LoadOnce()

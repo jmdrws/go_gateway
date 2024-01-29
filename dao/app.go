@@ -1,10 +1,11 @@
 package dao
 
 import (
-	"github.com/e421083458/golang_common/lib"
+	"github.com/e421083458/gorm"
 	"github.com/gin-gonic/gin"
 	"github.com/jmdrws/go_gateway/dto"
-	"gorm.io/gorm"
+	"github.com/jmdrws/go_gateway/golang_common/lib"
+	"github.com/jmdrws/go_gateway/public"
 	"net/http/httptest"
 	"sync"
 	"time"
@@ -29,7 +30,7 @@ func (t *App) TableName() string {
 
 func (t *App) Find(c *gin.Context, tx *gorm.DB, search *App) (*App, error) {
 	out := &App{}
-	err := tx.WithContext(c).Where("id = ?", search.ID).First(out).Error
+	err := tx.SetCtx(public.GetGinTraceContext(c)).Where("id = ?", search.ID).First(out).Error
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +38,7 @@ func (t *App) Find(c *gin.Context, tx *gorm.DB, search *App) (*App, error) {
 }
 
 func (t *App) Save(c *gin.Context, tx *gorm.DB) error {
-	return tx.WithContext(c).Save(t).Error
+	return tx.SetCtx(public.GetGinTraceContext(c)).Save(t).Error
 }
 
 func (t *App) APPList(c *gin.Context, tx *gorm.DB, param *dto.APPListInput) ([]App, int64, error) {
@@ -48,7 +49,7 @@ func (t *App) APPList(c *gin.Context, tx *gorm.DB, param *dto.APPListInput) ([]A
 
 	//limit offset,pagesize
 	offset := (pageNo - 1) * pageSize
-	query := tx.WithContext(c)
+	query := tx.SetCtx(public.GetGinTraceContext(c))
 	query = query.Table(t.TableName()).Select("*")
 	query = query.Where("is_delete = ?", 0)
 	if param.Info != "" {
@@ -101,7 +102,7 @@ func (s *AppManager) LoadOnce() error {
 			s.err = err
 			return
 		}
-		params := &dto.APPListInput{PageNo: 1, PageSize: 999999}
+		params := &dto.APPListInput{PageNo: 1, PageSize: 99999}
 		list, _, err := appInfo.APPList(c, tx, params)
 		if err != nil {
 			s.err = err

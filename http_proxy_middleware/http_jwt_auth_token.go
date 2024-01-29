@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-//jwt auth token
+// HTTPJwtAuthTokenMiddleware jwt auth token
 func HTTPJwtAuthTokenMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		serviceInterface, ok := c.Get("service")

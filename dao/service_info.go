@@ -1,9 +1,10 @@
 package dao
 
 import (
+	"github.com/e421083458/gorm"
 	"github.com/gin-gonic/gin"
 	"github.com/jmdrws/go_gateway/dto"
-	"gorm.io/gorm"
+	"github.com/jmdrws/go_gateway/public"
 	"time"
 )
 
@@ -26,7 +27,8 @@ func (t *ServiceInfo) PageList(c *gin.Context, tx *gorm.DB, param *dto.ServiceLi
 	var list []ServiceInfo
 	offset := (param.PageNo - 1) * param.PageSize
 
-	query := tx.WithContext(c).Table(t.TableName()).Where("is_delete = 0")
+	query := tx.SetCtx(public.GetGinTraceContext(c))
+	query = query.Table(t.TableName()).Where("is_delete = 0")
 	if param.Info != "" {
 		query = query.Where("(service_name like ? or service_desc like ?)", "%"+param.Info+"%", "%"+param.Info+"%")
 	}
@@ -90,7 +92,7 @@ func (t *ServiceInfo) ServiceDetail(c *gin.Context, tx *gorm.DB, search *Service
 
 func (t *ServiceInfo) Find(c *gin.Context, tx *gorm.DB, search *ServiceInfo) (*ServiceInfo, error) {
 	out := &ServiceInfo{}
-	err := tx.WithContext(c).Where("id = ?", search.ID).Or("service_name = ?", search.ServiceName).First(out).Error
+	err := tx.SetCtx(public.GetGinTraceContext(c)).Where("id = ?", search.ID).Or("service_name = ?", search.ServiceName).First(out).Error
 	if err != nil {
 		return nil, err
 	}
@@ -98,12 +100,12 @@ func (t *ServiceInfo) Find(c *gin.Context, tx *gorm.DB, search *ServiceInfo) (*S
 }
 
 func (t *ServiceInfo) Save(c *gin.Context, tx *gorm.DB) error {
-	return tx.WithContext(c).Save(t).Error
+	return tx.SetCtx(public.GetGinTraceContext(c)).Save(t).Error
 }
 
 func (t *ServiceInfo) GroupByLoadType(c *gin.Context, tx *gorm.DB) ([]dto.DashServiceStatItemOutput, error) {
 	var list []dto.DashServiceStatItemOutput
-	if err := tx.WithContext(c).Table(t.TableName()).Where("is_delete = 0").Select("load_type,count(*) as value").Group("load_type").Scan(&list).Error; err != nil {
+	if err := tx.SetCtx(public.GetGinTraceContext(c)).Table(t.TableName()).Where("is_delete = 0").Select("load_type,count(*) as value").Group("load_type").Scan(&list).Error; err != nil {
 		return nil, err
 	}
 	return list, nil

@@ -2,9 +2,9 @@ package dao
 
 import (
 	"errors"
-	"github.com/e421083458/golang_common/lib"
 	"github.com/gin-gonic/gin"
 	"github.com/jmdrws/go_gateway/dto"
+	"github.com/jmdrws/go_gateway/golang_common/lib"
 	"github.com/jmdrws/go_gateway/public"
 	"net/http/httptest"
 	"strings"
@@ -112,6 +112,7 @@ func (s *ServiceManager) LoadOnce() error {
 
 		//通过httptest.NewRecorder()模拟了http.ResponseWriter这个参数
 		c, _ := gin.CreateTestContext(httptest.NewRecorder())
+		//tx, err := lib.GetGormPool("default")
 		tx, err := lib.GetGormPool("default")
 		if err != nil {
 			s.err = err
