@@ -49,7 +49,7 @@ func HTTPFlowLimitMiddleware() gin.HandlerFunc {
 			}
 			//请求消费令牌
 			if !clientLimit.Allow() {
-				middleware.ResponseError(c, 5002, errors.New(fmt.Sprintf("%v flow limit %v", c.ClientIP(), serviceDetail.AccessControl.ClientIPFlowLimit)))
+				middleware.ResponseError(c, 5002, errors.New(fmt.Sprintf("%v flow limit %v", c.ClientIP()+serviceDetail.HTTPRule.Rule, serviceDetail.AccessControl.ClientIPFlowLimit)))
 				c.Abort()
 				return
 			}

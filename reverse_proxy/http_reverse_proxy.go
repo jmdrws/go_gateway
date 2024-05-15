@@ -10,6 +10,9 @@ import (
 	"strings"
 )
 
+//var count1 = 0
+//var count2 = 0
+
 // NewLoadBalanceReverseProxy 创建反向代理的方法
 func NewLoadBalanceReverseProxy(c *gin.Context, lb load_balance.LoadBalance, trans *http.Transport) *httputil.ReverseProxy {
 	//修改控制器内容，说白了就是拼接
@@ -17,7 +20,16 @@ func NewLoadBalanceReverseProxy(c *gin.Context, lb load_balance.LoadBalance, tra
 
 		//取得负载均衡的值nextAddr
 		nextAddr, err := lb.Get(req.URL.String())
-		//fmt.Println("nextAddr ", nextAddr)
+		//if nextAddr ==  "http://127.0.0.1:8001"{
+		//	count1++
+		//	fmt.Println("负载均衡分配IP地址: ", nextAddr)
+		//	fmt.Print(nextAddr,"请求总数: ", count1)
+		//}else {
+		//	count2++
+		//	fmt.Println("负载均衡分配IP地址: ", nextAddr)
+		//	fmt.Print(nextAddr,"请求总数: ", count2)
+		//}
+		//fmt.Print("nextAddr ", nextAddr)
 		if err != nil || nextAddr == "" {
 			panic("get next addr fail")
 		}

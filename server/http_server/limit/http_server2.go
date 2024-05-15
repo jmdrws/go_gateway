@@ -1,6 +1,8 @@
 package main
 
 import (
+	"encoding/json"
+	//"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -49,13 +51,51 @@ func (r *RealServer) HelloHandler(w http.ResponseWriter, req *http.Request) {
 	//r.Addr=127.0.0.1:8008
 	//req.URL.Path=/abc
 	//fmt.Println(req.Host)
-	upath := fmt.Sprintf("http://%s%s\n", r.Addr, req.URL.Path)
-	realIP := fmt.Sprintf("RemoteAddr=%s,X-Forwarded-For=%v,X-Real-Ip=%v\n", req.RemoteAddr, req.Header.Get("X-Forwarded-For"), req.Header.Get("X-Real-Ip"))
-	header := fmt.Sprintf("headers =%v\n", req.Header)
-	io.WriteString(w, upath)
-	io.WriteString(w, realIP)
-	io.WriteString(w, header)
+	upath := fmt.Sprintf("http://%s%s", r.Addr, req.URL.Path)
+	//realIP := fmt.Sprintf("RemoteAddr=%s,X-Forwarded-For=%v,X-Real-Ip=%v\n", req.RemoteAddr, req.Header.Get("X-Forwarded-For"), req.Header.Get("X-Real-Ip"))
+	//header := fmt.Sprintf("headers =%v\n", req.Header)
+	//io.WriteString(w, upath)
+	//io.WriteString(w, realIP)
+	//io.WriteString(w, header)
 
+	//var node1 = ""
+	//var node2 = ""
+	//if upath == "http://127.0.0.1:8001/" {
+	//	count1++
+	//} else {
+	//	count2++
+	//}
+	//node1 = node1 + "127.0.0.1:8001 请求总数: " + fmt.Sprintf("%d", count1)
+	//node2 = node2 + "127.0.0.1:8002 请求总数: " + fmt.Sprintf("%d", count2)
+	// 创建一个Response实例
+	response := Response{
+		Status: 200,
+		//Message: upath + "\n" + realIP + "\n" + header,
+		Path: upath,
+		//Node1: node1,
+		//Node2: node2,
+	}
+
+	// 设置响应头类型为JSON
+	w.Header().Set("Content-Type", "application/json")
+
+	// 将数据编码为JSON
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// 写入响应
+	w.Write(jsonResponse)
+}
+
+// 定义一个结构体，用于生成JSON数据
+type Response struct {
+	Status int    `json:"status"`
+	Path   string `json:"path"`
+	//Node1  string `json:"node1"`
+	//Node2  string `json:"node2"`
 }
 
 func (r *RealServer) ErrorHandler(w http.ResponseWriter, req *http.Request) {

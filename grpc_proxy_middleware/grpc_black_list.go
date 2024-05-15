@@ -11,7 +11,6 @@ import (
 	"strings"
 )
 
-//匹配接入方式 基于请求信息
 func GrpcBlackListMiddleware(serviceDetail *dao.ServiceDetail) func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 	return func(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
 		whileIpList := []string{}

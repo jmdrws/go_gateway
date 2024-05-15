@@ -12,8 +12,10 @@ import (
 	"time"
 )
 
+//qps:852
+//qps:21060
 func main() {
-	addr := "127.0.0.1:8402"
+	addr := "127.0.0.1:8012"
 	processTime := int64(20)
 
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(processTime)*time.Second)
@@ -36,7 +38,7 @@ func main() {
 			for {
 				select {
 				case <-ctx.Done():
-					fmt.Println("ctx.Done")
+					//fmt.Println("ctx.Done")
 					return
 				default:
 				}
@@ -50,7 +52,9 @@ func main() {
 		}(ctx)
 	}
 	wg.Wait()
-	fmt.Printf("result qps:%v succ:%v fail:%v", totalCount/processTime, successCount, failCount)
+	fmt.Println("result qps:", totalCount/processTime)
+	fmt.Println("result succ: ", successCount)
+	fmt.Println("result fail: ", failCount)
 }
 
 func unaryCallWithMetadata(c pb.EchoClient, message string) error {

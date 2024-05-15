@@ -70,6 +70,7 @@ func NewRedisFlowCountService(appID string, interval time.Duration) *RedisFlowCo
 			tickerCount = totalCount - reqCounter.TotalCount
 			if nowUnix > reqCounter.Unix {
 				reqCounter.TotalCount = totalCount
+				//QPS
 				reqCounter.QPS = tickerCount / (nowUnix - reqCounter.Unix)
 				reqCounter.Unix = time.Now().Unix()
 				//reqCounter.Unix = nowUnix

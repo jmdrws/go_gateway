@@ -15,12 +15,12 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-var addr = flag.String("addr", "localhost:8402", "the address to connect to")
+var addr = flag.String("addr", "localhost:8012", "the address to connect to")
 
 const (
 	timestampFormat = time.StampNano // "Jan _2 15:04:05.000"
 	streamingCount  = 10
-	AccessToken     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MDY2MDQ4NTQsImlzcyI6ImFwcF9pZF9iIn0.-oDmzg6lZO0pb_VGvYjishCwYvZfovu5pVjy15BczWg"
+	AccessToken     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTM4NjI5MjksImlzcyI6InVzZXJfYSJ9.QLWtDbyg-tOfhPtpliw0JjpLMbG7PDf1m48s6pfJsSA"
 )
 
 func unaryCallWithMetadata(c pb.EchoClient, message string) {

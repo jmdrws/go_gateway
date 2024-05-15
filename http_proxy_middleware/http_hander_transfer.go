@@ -21,7 +21,7 @@ func HTTPHeaderTransferMiddleware() gin.HandlerFunc {
 		//header转换支持增加(add)、删除(del)、修改(edit) 格式: add headname headvalue
 		for _, item := range strings.Split(serverDetail.HTTPRule.HeaderTransfor, ",") {
 			items := strings.Split(item, " ")
-			if len(items) != 3 {
+			if len(items) != 3 && len(items) != 2 {
 				continue
 			}
 			if items[0] == "add" || items[0] == "edit" {

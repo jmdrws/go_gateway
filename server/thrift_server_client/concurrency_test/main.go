@@ -11,9 +11,11 @@ import (
 	"time"
 )
 
+//qps:42528
+//qps:22818
 func main() {
-	addr := "127.0.0.1:8401"
-	processTime := int64(20)
+	addr := "127.0.0.1:8011"
+	processTime := int64(30)
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(processTime)*time.Second)
 
 	wg := sync.WaitGroup{}
@@ -41,7 +43,7 @@ func main() {
 			for {
 				select {
 				case <-ctx.Done():
-					fmt.Println("ctx.Done")
+					//fmt.Println("ctx.Done")
 					return
 				default:
 				}
@@ -57,5 +59,7 @@ func main() {
 		}(ctx)
 	}
 	wg.Wait()
-	fmt.Printf("result qps:%v succ:%v fail:%v", totalCount/processTime, successCount, failCount)
+	fmt.Println("result qps: ", totalCount/processTime)
+	fmt.Println("result success: ", successCount)
+	fmt.Println("result fail: ", failCount)
 }
